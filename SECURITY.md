@@ -96,12 +96,10 @@ Implementations should:
 
 ## Reporting Vulnerabilities
 
-Please report security vulnerabilities to: security@corvidlabs.io
+Please report security vulnerabilities as GitHub issues.
 
 Include:
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact
 - Suggested fix (if any)
-
-We will acknowledge receipt within 48 hours and provide updates on remediation.
