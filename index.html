@@ -126,28 +126,34 @@
         .wire-format {
             background-color: #1a1d21;
             padding: 24px;
-            text-align: center;
-            font-size: 9px;
             margin: 20px 0;
+            overflow-x: auto;
         }
-        .wire-row {
+        .wire-bytes {
             display: flex;
-            flex-wrap: wrap;
+            align-items: stretch;
             justify-content: center;
-            gap: 4px;
-            margin-bottom: 8px;
-        }
-        .wire-row:last-child {
-            margin-bottom: 0;
+            gap: 0;
+            font-size: 8px;
+            min-width: fit-content;
         }
         .byte {
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 12px;
+            padding: 12px 8px;
             background-color: #2d3238;
             border: 2px solid #92cc41;
+            border-left-width: 1px;
+            border-right-width: 1px;
             white-space: nowrap;
+            text-align: center;
+        }
+        .byte:first-child {
+            border-left-width: 2px;
+        }
+        .byte:last-child {
+            border-right-width: 2px;
         }
         .byte.header {
             border-color: #f7d51d;
@@ -165,7 +171,7 @@
             display: flex;
             justify-content: center;
             gap: 24px;
-            margin-top: 16px;
+            margin-top: 20px;
             font-size: 8px;
         }
         .legend-item {
@@ -174,8 +180,8 @@
             gap: 8px;
         }
         .legend-color {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border: 2px solid;
         }
         .legend-color.header {
@@ -195,6 +201,7 @@
             margin-top: 20px;
             padding-top: 16px;
             border-top: 1px solid #3d4348;
+            font-size: 10px;
         }
         .section {
             margin-top: 24px;
@@ -246,16 +253,14 @@
         <section class="nes-container with-title is-dark section">
             <p class="title">Wire Format (v1)</p>
             <div class="wire-format">
-                <div class="wire-row">
-                    <span class="byte header">version: 1</span>
-                    <span class="byte header">protocol: 1</span>
-                    <span class="byte crypto">sender_pubkey: 32</span>
-                    <span class="byte crypto">ephemeral_pubkey: 32</span>
-                </div>
-                <div class="wire-row">
-                    <span class="byte crypto">nonce: 12</span>
-                    <span class="byte crypto">encrypted_sender_key: 48</span>
-                    <span class="byte payload">ciphertext: variable</span>
+                <div class="wire-bytes">
+                    <span class="byte header">ver:1</span>
+                    <span class="byte header">proto:1</span>
+                    <span class="byte crypto">sender_pk:32</span>
+                    <span class="byte crypto">ephemeral_pk:32</span>
+                    <span class="byte crypto">nonce:12</span>
+                    <span class="byte crypto">enc_sender:48</span>
+                    <span class="byte payload">ciphertext:var</span>
                 </div>
                 <div class="wire-legend">
                     <div class="legend-item">
