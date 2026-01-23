@@ -246,7 +246,11 @@ ENCRYPTION_INFO_PREFIX = "AlgoChatV1"
 SENDER_KEY_INFO_PREFIX = "AlgoChatV1-SenderKey"
 ```
 
-## 12. Version History
+## 12. Test Vectors
+
+See [TEST-VECTORS.md](./TEST-VECTORS.md) for canonical test vectors that enable cross-implementation verification.
+
+## 13. Version History
 
 | Version | Changes |
 |---------|---------|
