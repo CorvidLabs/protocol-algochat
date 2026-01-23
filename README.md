@@ -1,6 +1,6 @@
 # AlgoChat Protocol
 
-[![License](https://img.shields.io/github/license/CorvidLabs/algochat-protocol)](https://github.com/CorvidLabs/algochat-protocol/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/CorvidLabs/protocol-algochat)](https://github.com/CorvidLabs/protocol-algochat/blob/main/LICENSE)
 
 End-to-end encrypted messaging protocol for the Algorand blockchain.
 
