@@ -1,0 +1,12 @@
+title: AlgoChat Protocol
+description: End-to-end encrypted messaging protocol for Algorand
+theme: jekyll-theme-midnight
+markdown: kramdown
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+exclude:
+  - LICENSE
+  - "*.lock"
