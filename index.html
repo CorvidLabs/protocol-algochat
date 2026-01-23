@@ -42,7 +42,7 @@
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         .header i {
             font-size: 64px;
@@ -50,16 +50,37 @@
         }
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
             margin: 20px 0;
         }
+        @media (max-width: 600px) {
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
         .feature-item {
-            padding: 15px;
+            padding: 16px;
+            background-color: #1a1d21;
+            border: 2px solid #3d4348;
+        }
+        .feature-item .feature-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
         }
         .feature-item i {
             color: #f7d51d;
-            margin-right: 10px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .feature-item strong {
+            color: #92cc41;
+        }
+        .feature-item p {
+            margin: 0;
+            color: #adb5bd;
+            font-size: 10px;
         }
         pre {
             background-color: #1a1d21;
@@ -71,14 +92,15 @@
             color: #92cc41;
         }
         .doc-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
             margin: 20px 0;
         }
         .doc-link {
             text-align: center;
-            padding: 20px;
+            min-width: 180px;
         }
         .impl-table {
             width: 100%;
@@ -103,23 +125,79 @@
         }
         .wire-format {
             background-color: #1a1d21;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
-            font-size: 10px;
+            font-size: 9px;
             margin: 20px 0;
         }
-        .wire-format .byte {
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 2px;
+        .wire-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+        .wire-row:last-child {
+            margin-bottom: 0;
+        }
+        .byte {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
             background-color: #2d3238;
             border: 2px solid #92cc41;
+            white-space: nowrap;
         }
-        .wire-format .byte.header {
+        .byte.header {
             border-color: #f7d51d;
+            background-color: #3d3520;
         }
-        .wire-format .byte.crypto {
+        .byte.crypto {
             border-color: #e76e55;
+            background-color: #3d2520;
+        }
+        .byte.payload {
+            border-color: #92cc41;
+            background-color: #203d25;
+        }
+        .wire-legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+            font-size: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border: 2px solid;
+        }
+        .legend-color.header {
+            border-color: #f7d51d;
+            background-color: #3d3520;
+        }
+        .legend-color.crypto {
+            border-color: #e76e55;
+            background-color: #3d2520;
+        }
+        .legend-color.payload {
+            border-color: #92cc41;
+            background-color: #203d25;
+        }
+        .wire-summary {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #3d4348;
+        }
+        .section {
+            margin-top: 24px;
         }
     </style>
 </head>
@@ -135,45 +213,71 @@
             <p class="title">Features</p>
             <div class="feature-grid">
                 <div class="feature-item">
-                    <i class="nes-icon is-small heart"></i>
-                    <strong>End-to-End Encryption</strong>
+                    <div class="feature-header">
+                        <i class="nes-icon is-small heart"></i>
+                        <strong>End-to-End Encryption</strong>
+                    </div>
                     <p>X25519 + ChaCha20-Poly1305</p>
                 </div>
                 <div class="feature-item">
-                    <i class="nes-icon is-small star"></i>
-                    <strong>Forward Secrecy</strong>
+                    <div class="feature-header">
+                        <i class="nes-icon is-small star"></i>
+                        <strong>Forward Secrecy</strong>
+                    </div>
                     <p>Per-message ephemeral keys</p>
                 </div>
                 <div class="feature-item">
-                    <i class="nes-icon is-small coin"></i>
-                    <strong>Immutable Storage</strong>
-                    <p>Messages on blockchain</p>
+                    <div class="feature-header">
+                        <i class="nes-icon is-small coin"></i>
+                        <strong>Immutable Storage</strong>
+                    </div>
+                    <p>Messages stored on blockchain</p>
                 </div>
                 <div class="feature-item">
-                    <i class="nes-icon is-small trophy"></i>
-                    <strong>Decentralized</strong>
-                    <p>No central server</p>
+                    <div class="feature-header">
+                        <i class="nes-icon is-small trophy"></i>
+                        <strong>Decentralized</strong>
+                    </div>
+                    <p>No central server required</p>
                 </div>
             </div>
         </section>
 
-        <section class="nes-container with-title is-dark" style="margin-top: 20px;">
+        <section class="nes-container with-title is-dark section">
             <p class="title">Wire Format (v1)</p>
             <div class="wire-format">
-                <span class="byte header">version: 1</span>
-                <span class="byte header">protocol: 1</span>
-                <span class="byte crypto">sender_pubkey: 32</span>
-                <span class="byte crypto">ephemeral_pubkey: 32</span>
-                <span class="byte crypto">nonce: 12</span>
-                <span class="byte crypto">encrypted_sender_key: 48</span>
-                <span class="byte">ciphertext: variable</span>
+                <div class="wire-row">
+                    <span class="byte header">version: 1</span>
+                    <span class="byte header">protocol: 1</span>
+                    <span class="byte crypto">sender_pubkey: 32</span>
+                    <span class="byte crypto">ephemeral_pubkey: 32</span>
+                </div>
+                <div class="wire-row">
+                    <span class="byte crypto">nonce: 12</span>
+                    <span class="byte crypto">encrypted_sender_key: 48</span>
+                    <span class="byte payload">ciphertext: variable</span>
+                </div>
+                <div class="wire-legend">
+                    <div class="legend-item">
+                        <span class="legend-color header"></span>
+                        <span>Header</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color crypto"></span>
+                        <span>Crypto</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color payload"></span>
+                        <span>Payload</span>
+                    </div>
+                </div>
+                <div class="wire-summary">
+                    <strong>Fixed header:</strong> 126 bytes &nbsp;|&nbsp; <strong>Max payload:</strong> 898 bytes &nbsp;|&nbsp; <strong>Note limit:</strong> 1024 bytes
+                </div>
             </div>
-            <p style="text-align: center; margin-top: 15px;">
-                <strong>Header:</strong> 126 bytes | <strong>Max message:</strong> 882 bytes
-            </p>
         </section>
 
-        <section class="nes-container with-title is-dark" style="margin-top: 20px;">
+        <section class="nes-container with-title is-dark section">
             <p class="title">Cryptographic Primitives</p>
             <table class="nes-table is-bordered is-dark impl-table">
                 <thead>
@@ -187,7 +291,7 @@
             </table>
         </section>
 
-        <section class="nes-container with-title is-dark" style="margin-top: 20px;">
+        <section class="nes-container with-title is-dark section">
             <p class="title">Documentation</p>
             <div class="doc-links">
                 <a href="https://github.com/CorvidLabs/protocol-algochat/blob/main/PROTOCOL.md" class="nes-btn is-primary doc-link">
@@ -202,7 +306,7 @@
             </div>
         </section>
 
-        <section class="nes-container with-title is-dark" style="margin-top: 20px;">
+        <section class="nes-container with-title is-dark section">
             <p class="title">Implementations</p>
             <table class="nes-table is-bordered is-dark impl-table">
                 <thead>
@@ -223,7 +327,7 @@
             </table>
         </section>
 
-        <section class="nes-container with-title is-dark" style="margin-top: 20px;">
+        <section class="nes-container with-title is-dark section">
             <p class="title">Transport</p>
             <p>Messages are transmitted as the <code>note</code> field of Algorand payment transactions:</p>
             <ul class="nes-list is-disc" style="margin-top: 15px;">
