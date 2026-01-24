@@ -36,13 +36,22 @@ jobs:
 
           echo "$OUTPUT"
 
-          # Swift test summary: "Executed 50 tests, with 0 failures"
-          TOTAL=$(echo "$OUTPUT" | grep -oE 'Executed [0-9]+ tests' | grep -oE '[0-9]+' | head -1)
-          FAILURES=$(echo "$OUTPUT" | grep -oE 'with [0-9]+ failures' | grep -oE '[0-9]+' | head -1)
-          [ -z "$TOTAL" ] && TOTAL=0
-          [ -z "$FAILURES" ] && FAILURES=0
-          PASSED=$((TOTAL - FAILURES))
-          FAILED=$FAILURES
+          # Swift 6 format: "Test run with 55 tests passed after 0.043 seconds."
+          # Swift 5 format: "Executed 50 tests, with 0 failures"
+          if echo "$OUTPUT" | grep -q "Test run with"; then
+            PASSED=$(echo "$OUTPUT" | grep -oE 'Test run with [0-9]+ tests passed' | grep -oE '[0-9]+' | head -1)
+            FAILED=0
+          else
+            TOTAL=$(echo "$OUTPUT" | grep -oE 'Executed [0-9]+ tests' | grep -oE '[0-9]+' | head -1)
+            FAILURES=$(echo "$OUTPUT" | grep -oE 'with [0-9]+ failures' | grep -oE '[0-9]+' | head -1)
+            [ -z "$TOTAL" ] && TOTAL=0
+            [ -z "$FAILURES" ] && FAILURES=0
+            PASSED=$((TOTAL - FAILURES))
+            FAILED=$FAILURES
+          fi
+          [ -z "$PASSED" ] && PASSED=0
+          [ -z "$FAILED" ] && FAILED=0
+          TOTAL=$((PASSED + FAILED))
 
           if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
             ERROR="\"Build failed\""
