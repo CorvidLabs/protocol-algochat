@@ -29,26 +29,27 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          OUTPUT=$(swift test 2>&1)
-          EXIT_CODE=$?
+          swift test 2>&1 | tee swift_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "$OUTPUT"
+          echo "=== Looking for test results ==="
+          grep -i "test" swift_output.txt | tail -10
 
-          # Swift 6 format: "Test run with 55 tests passed after 0.043 seconds."
-          # Swift 5 format: "Executed 50 tests, with 0 failures"
-          if echo "$OUTPUT" | grep -q "Test run with"; then
-            PASSED=$(echo "$OUTPUT" | grep -oE 'Test run with [0-9]+ tests passed' | grep -oE '[0-9]+' | head -1)
-            FAILED=0
-          else
-            TOTAL=$(echo "$OUTPUT" | grep -oE 'Executed [0-9]+ tests' | grep -oE '[0-9]+' | head -1)
-            FAILURES=$(echo "$OUTPUT" | grep -oE 'with [0-9]+ failures' | grep -oE '[0-9]+' | head -1)
-            [ -z "$TOTAL" ] && TOTAL=0
-            [ -z "$FAILURES" ] && FAILURES=0
-            PASSED=$((TOTAL - FAILURES))
-            FAILED=$FAILURES
+          # Swift 6: "Test run with 55 tests passed after 0.043 seconds."
+          # Also try: "✔ Test run with X tests passed"
+          PASSED=$(grep -oE '[0-9]+ tests? passed' swift_output.txt | grep -oE '[0-9]+' | head -1)
+          FAILED=$(grep -oE '[0-9]+ tests? failed' swift_output.txt | grep -oE '[0-9]+' | head -1)
+
+          # Fallback: count individual test case results
+          if [ -z "$PASSED" ]; then
+            PASSED=$(grep -c "passed (" swift_output.txt || echo "0")
           fi
+          if [ -z "$FAILED" ]; then
+            FAILED=$(grep -c "failed (" swift_output.txt || echo "0")
+          fi
+
           [ -z "$PASSED" ] && PASSED=0
           [ -z "$FAILED" ] && FAILED=0
           TOTAL=$((PASSED + FAILED))
