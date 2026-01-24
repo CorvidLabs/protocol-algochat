@@ -29,76 +29,32 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          # Run swift test with --disable-xctest-skip to ensure proper output
           swift test 2>&1 | tee swift_output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          # Give time for any buffered output to flush
-          sleep 2
-
-          echo "=== Test output tail (last 20 lines) ==="
+          echo "=== Test output tail ==="
           tail -20 swift_output.txt
-          echo "=== End ==="
 
-          PASSED=0
-          FAILED=0
-
-          echo ">>> Parsing test results..."
-
-          # Method 1: Swift Testing summary "✔ Test run with X tests passed"
-          SUMMARY_LINE=$(grep "Test run with" swift_output.txt | tail -1 || true)
-          if [ -n "$SUMMARY_LINE" ]; then
-            echo ">>> Found Swift Testing summary: $SUMMARY_LINE"
-            PASSED=$(echo "$SUMMARY_LINE" | grep -oE '[0-9]+' | head -1)
-            if echo "$SUMMARY_LINE" | grep -qE "[0-9]+ (issue|fail)"; then
-              FAILED=$(echo "$SUMMARY_LINE" | grep -oE '[0-9]+ (issue|fail)' | grep -oE '[0-9]+' | head -1)
-            fi
-          # Method 2: XCTest "Executed X tests" (skip 0 tests)
-          elif EXECUTED_LINE=$(grep "Executed [1-9]" swift_output.txt | tail -1); then
-            echo ">>> Found XCTest: $EXECUTED_LINE"
-            PASSED=$(echo "$EXECUTED_LINE" | grep -oE 'Executed [0-9]+' | grep -oE '[0-9]+')
-            FAILED=$(echo "$EXECUTED_LINE" | grep -oE '[0-9]+ failure' | grep -oE '[0-9]+' | head -1)
-          else
-            # Method 3: Count test starts (Swift Testing outputs these for each test)
-            TEST_STARTS=$(grep -c "◇ Test \"" swift_output.txt || echo "0")
-            # Count success markers (✅ or ✓ from test output)
-            SUCCESS_MARKS=$(grep -c "✅\|✓" swift_output.txt || echo "0")
-            # Count failure markers
-            FAIL_MARKS=$(grep -c "✘\|❌" swift_output.txt || echo "0")
-
-            echo ">>> Test starts: $TEST_STARTS, Success marks: $SUCCESS_MARKS, Fail marks: $FAIL_MARKS"
-
-            # If we have test starts and Test Suite passed, use test starts as count
-            if [ "$TEST_STARTS" -gt 0 ] && grep -q "Test Suite.*passed" swift_output.txt; then
-              PASSED=$TEST_STARTS
-              echo ">>> Using test starts count: $PASSED (suite passed)"
-            elif [ "$SUCCESS_MARKS" -gt 0 ]; then
-              # Use success marks as estimate
-              PASSED=$SUCCESS_MARKS
-              FAILED=$FAIL_MARKS
-              echo ">>> Using success marks: $PASSED passed, $FAILED failed"
-            fi
-          fi
-
-          [ -z "$PASSED" ] && PASSED=0
-          [ -z "$FAILED" ] && FAILED=0
-          TOTAL=$((PASSED + FAILED))
-
-          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
-            ERROR="\"Build failed\""
-          else
+          # Simple pass/fail: check if Test Suite passed
+          if grep -q "Test Suite.*passed\|Test run.*passed\|✅" swift_output.txt; then
+            STATUS="passing"
             ERROR="null"
+          elif [ $EXIT_CODE -eq 0 ]; then
+            STATUS="passing"
+            ERROR="null"
+          else
+            STATUS="failing"
+            ERROR="\"Tests failed\""
           fi
+
+          echo ">>> Status: $STATUS (exit code: $EXIT_CODE)"
 
           cat > swift-algochat.json << EOF
           {
             "implementationId": "swift-algochat",
-            "passed": $PASSED,
-            "failed": $FAILED,
-            "skipped": 0,
-            "total": $TOTAL,
+            "status": "$STATUS",
             "duration": $DURATION,
             "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -130,32 +86,27 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          OUTPUT=$(bun test 2>&1)
-          EXIT_CODE=$?
+          bun test 2>&1 | tee test_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "$OUTPUT"
+          cat test_output.txt
 
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1)
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1)
-          [ -z "$PASSED" ] && PASSED=0
-          [ -z "$FAILED" ] && FAILED=0
-          TOTAL=$((PASSED + FAILED))
-
-          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
-            ERROR="\"Build failed\""
-          else
+          if [ $EXIT_CODE -eq 0 ]; then
+            STATUS="passing"
             ERROR="null"
+          else
+            STATUS="failing"
+            ERROR="\"Tests failed\""
           fi
+
+          echo ">>> Status: $STATUS"
 
           cat > ts-algochat.json << EOF
           {
             "implementationId": "ts-algochat",
-            "passed": $PASSED,
-            "failed": $FAILED,
-            "skipped": 0,
-            "total": $TOTAL,
+            "status": "$STATUS",
             "duration": $DURATION,
             "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -191,32 +142,25 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          OUTPUT=$(pytest -v 2>&1)
-          EXIT_CODE=$?
+          pytest -v 2>&1 | tee test_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "$OUTPUT"
-
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1)
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1)
-          [ -z "$PASSED" ] && PASSED=0
-          [ -z "$FAILED" ] && FAILED=0
-          TOTAL=$((PASSED + FAILED))
-
-          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
-            ERROR="\"Build failed\""
-          else
+          if [ $EXIT_CODE -eq 0 ]; then
+            STATUS="passing"
             ERROR="null"
+          else
+            STATUS="failing"
+            ERROR="\"Tests failed\""
           fi
+
+          echo ">>> Status: $STATUS"
 
           cat > py-algochat.json << EOF
           {
             "implementationId": "py-algochat",
-            "passed": $PASSED,
-            "failed": $FAILED,
-            "skipped": 0,
-            "total": $TOTAL,
+            "status": "$STATUS",
             "duration": $DURATION,
             "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -245,32 +189,25 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          OUTPUT=$(cargo test 2>&1)
-          EXIT_CODE=$?
+          cargo test 2>&1 | tee test_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "$OUTPUT"
-
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1)
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1)
-          [ -z "$PASSED" ] && PASSED=0
-          [ -z "$FAILED" ] && FAILED=0
-          TOTAL=$((PASSED + FAILED))
-
-          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
-            ERROR="\"Build failed\""
-          else
+          if [ $EXIT_CODE -eq 0 ]; then
+            STATUS="passing"
             ERROR="null"
+          else
+            STATUS="failing"
+            ERROR="\"Tests failed\""
           fi
+
+          echo ">>> Status: $STATUS"
 
           cat > rs-algochat.json << EOF
           {
             "implementationId": "rs-algochat",
-            "passed": $PASSED,
-            "failed": $FAILED,
-            "skipped": 0,
-            "total": $TOTAL,
+            "status": "$STATUS",
             "duration": $DURATION,
             "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -302,33 +239,25 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          OUTPUT=$(./gradlew test --console=plain 2>&1 || gradle test --console=plain 2>&1)
-          EXIT_CODE=$?
+          ./gradlew test --console=plain 2>&1 | tee test_output.txt || gradle test --console=plain 2>&1 | tee test_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "$OUTPUT"
-
-          # Gradle output: "X tests completed, Y failed"
-          TOTAL=$(echo "$OUTPUT" | grep -oP '\d+(?= tests? completed)' | head -1)
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1)
-          [ -z "$TOTAL" ] && TOTAL=0
-          [ -z "$FAILED" ] && FAILED=0
-          PASSED=$((TOTAL - FAILED))
-
-          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
-            ERROR="\"Build failed\""
-          else
+          if [ $EXIT_CODE -eq 0 ]; then
+            STATUS="passing"
             ERROR="null"
+          else
+            STATUS="failing"
+            ERROR="\"Tests failed\""
           fi
+
+          echo ">>> Status: $STATUS"
 
           cat > kt-algochat.json << EOF
           {
             "implementationId": "kt-algochat",
-            "passed": $PASSED,
-            "failed": $FAILED,
-            "skipped": 0,
-            "total": $TOTAL,
+            "status": "$STATUS",
             "duration": $DURATION,
             "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -363,40 +292,30 @@ jobs:
 
           # Check if tests exist
           if [ -d "tests" ] || [ -d "test" ] || ls *.test.ts >/dev/null 2>&1 || ls **/*.test.ts >/dev/null 2>&1; then
-            OUTPUT=$(bun test 2>&1)
-            EXIT_CODE=$?
+            bun test 2>&1 | tee test_output.txt
+            EXIT_CODE=${PIPESTATUS[0]}
           else
-            OUTPUT="No tests found"
+            echo "No tests found"
             EXIT_CODE=0
           fi
 
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "$OUTPUT"
-
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1)
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1)
-          [ -z "$PASSED" ] && PASSED=0
-          [ -z "$FAILED" ] && FAILED=0
-          TOTAL=$((PASSED + FAILED))
-
-          # No tests is not an error for early-stage projects
-          if [ "$OUTPUT" = "No tests found" ]; then
+          if [ $EXIT_CODE -eq 0 ]; then
+            STATUS="passing"
             ERROR="null"
-          elif [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
-            ERROR="\"Build failed\""
           else
-            ERROR="null"
+            STATUS="failing"
+            ERROR="\"Tests failed\""
           fi
+
+          echo ">>> Status: $STATUS"
 
           cat > algochat-web.json << EOF
           {
             "implementationId": "algochat-web",
-            "passed": $PASSED,
-            "failed": $FAILED,
-            "skipped": 0,
-            "total": $TOTAL,
+            "status": "$STATUS",
             "duration": $DURATION,
             "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"

@@ -16,10 +16,7 @@ interface Implementation {
 
 interface TestResult {
     implementationId: string;
-    passed: number;
-    failed: number;
-    skipped: number;
-    total: number;
+    status: "passing" | "failing";
     duration: number;
     error: string | null;
     timestamp: string;
@@ -92,10 +89,10 @@ function generateTableRow(impl: Implementation, result: TestResult | null): stri
         testsCell = `<span class="test-status test-pending">...</span>`;
     } else if (result.error !== null) {
         testsCell = `<span class="test-status test-error">ERR</span>`;
-    } else if (result.failed > 0) {
-        testsCell = `<span class="test-status test-warning">${result.passed}/${result.total}</span>`;
+    } else if (result.status === "failing") {
+        testsCell = `<span class="test-status test-error">FAIL</span>`;
     } else {
-        testsCell = `<span class="test-status test-success">${result.passed}/${result.total}</span>`;
+        testsCell = `<span class="test-status test-success">PASS</span>`;
     }
 
     return `
@@ -123,11 +120,11 @@ function generateSvgBadge(impl: Implementation, result: TestResult | null): stri
     } else if (result.error !== null) {
         value = "error";
         color = "#e76e55";
-    } else if (result.failed > 0) {
-        value = `${result.passed}/${result.total}`;
-        color = "#f7d51d";
+    } else if (result.status === "failing") {
+        value = "failing";
+        color = "#e76e55";
     } else {
-        value = `${result.passed}/${result.total}`;
+        value = "passing";
         color = "#92cc41";
     }
 
@@ -166,9 +163,9 @@ function generateHtml(implementations: Implementation[], results: Map<string, Te
     const testedImpls = Array.from(results.values()).filter(
         (r): r is TestResult => r !== null && r.error === null
     );
-    const totalPassed = testedImpls.reduce((sum, r) => sum + r.passed, 0);
-    const totalFailed = testedImpls.reduce((sum, r) => sum + r.failed, 0);
-    const totalTests = testedImpls.reduce((sum, r) => sum + r.total, 0);
+    const passingCount = testedImpls.filter((r) => r.status === "passing").length;
+    const failingCount = testedImpls.filter((r) => r.status === "failing").length;
+    const totalCount = testedImpls.length;
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -288,15 +285,15 @@ function generateHtml(implementations: Implementation[], results: Map<string, Te
             <p class="title">Summary</p>
             <div class="summary">
                 <div class="stat">
-                    <span class="stat-value green">${totalPassed}</span>
-                    <span class="stat-label">Passed</span>
+                    <span class="stat-value green">${passingCount}</span>
+                    <span class="stat-label">Passing</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value ${totalFailed > 0 ? "red" : ""}">${totalFailed}</span>
-                    <span class="stat-label">Failed</span>
+                    <span class="stat-value ${failingCount > 0 ? "red" : ""}">${failingCount}</span>
+                    <span class="stat-label">Failing</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value">${totalTests}</span>
+                    <span class="stat-value">${totalCount}</span>
                     <span class="stat-label">Total</span>
                 </div>
             </div>
@@ -346,7 +343,7 @@ async function main(): Promise<void> {
         results.set(impl.id, result);
         console.log(
             result !== null
-                ? `  ${impl.id}: ${result.passed}/${result.total} passed`
+                ? `  ${impl.id}: ${result.status}`
                 : `  ${impl.id}: no results`
         );
     }
