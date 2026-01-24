@@ -26,18 +26,17 @@ jobs:
           repository: CorvidLabs/swift-algochat
 
       - name: Run Swift tests
-        id: test
         run: |
           set +e
-          START_TIME=$(date +%s%3N)
+          START_TIME=$(date +%s)
           OUTPUT=$(swift test 2>&1)
           EXIT_CODE=$?
-          END_TIME=$(date +%s%3N)
-          DURATION=$((END_TIME - START_TIME))
+          END_TIME=$(date +%s)
+          DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          # Swift test output: "Test Case '-[Module.TestClass testName]' passed"
-          PASSED=$(echo "$OUTPUT" | grep -c "passed")
-          FAILED=$(echo "$OUTPUT" | grep -c "failed")
+          # Swift test: "Test Case '-[Module.TestClass testName]' passed (0.001 seconds)"
+          PASSED=$(echo "$OUTPUT" | grep -c "' passed")
+          FAILED=$(echo "$OUTPUT" | grep -c "' failed")
           TOTAL=$((PASSED + FAILED))
 
           if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
@@ -58,6 +57,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          cat swift-algochat.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
@@ -80,17 +80,18 @@ jobs:
         run: bun install
 
       - name: Run TypeScript tests
-        id: test
         run: |
           set +e
-          START_TIME=$(date +%s%3N)
+          START_TIME=$(date +%s)
           OUTPUT=$(bun test 2>&1)
           EXIT_CODE=$?
-          END_TIME=$(date +%s%3N)
-          DURATION=$((END_TIME - START_TIME))
+          END_TIME=$(date +%s)
+          DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1 || echo "0")
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1 || echo "0")
+          echo "$OUTPUT"
+
+          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1)
+          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1)
           [ -z "$PASSED" ] && PASSED=0
           [ -z "$FAILED" ] && FAILED=0
           TOTAL=$((PASSED + FAILED))
@@ -113,6 +114,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          cat ts-algochat.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
@@ -139,17 +141,18 @@ jobs:
           pip install pytest
 
       - name: Run Python tests
-        id: test
         run: |
           set +e
-          START_TIME=$(date +%s%3N)
+          START_TIME=$(date +%s)
           OUTPUT=$(pytest -v 2>&1)
           EXIT_CODE=$?
-          END_TIME=$(date +%s%3N)
-          DURATION=$((END_TIME - START_TIME))
+          END_TIME=$(date +%s)
+          DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1 || echo "0")
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1 || echo "0")
+          echo "$OUTPUT"
+
+          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1)
+          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1)
           [ -z "$PASSED" ] && PASSED=0
           [ -z "$FAILED" ] && FAILED=0
           TOTAL=$((PASSED + FAILED))
@@ -172,6 +175,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          cat py-algochat.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
@@ -191,17 +195,18 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Run Rust tests
-        id: test
         run: |
           set +e
-          START_TIME=$(date +%s%3N)
+          START_TIME=$(date +%s)
           OUTPUT=$(cargo test 2>&1)
           EXIT_CODE=$?
-          END_TIME=$(date +%s%3N)
-          DURATION=$((END_TIME - START_TIME))
+          END_TIME=$(date +%s)
+          DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1 || echo "0")
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1 || echo "0")
+          echo "$OUTPUT"
+
+          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1)
+          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1)
           [ -z "$PASSED" ] && PASSED=0
           [ -z "$FAILED" ] && FAILED=0
           TOTAL=$((PASSED + FAILED))
@@ -224,6 +229,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          cat rs-algochat.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
@@ -246,20 +252,22 @@ jobs:
           java-version: '17'
 
       - name: Run Kotlin tests
-        id: test
         run: |
           set +e
-          START_TIME=$(date +%s%3N)
-          OUTPUT=$(./gradlew test 2>&1 || gradle test 2>&1)
+          START_TIME=$(date +%s)
+          OUTPUT=$(./gradlew test --console=plain 2>&1 || gradle test --console=plain 2>&1)
           EXIT_CODE=$?
-          END_TIME=$(date +%s%3N)
-          DURATION=$((END_TIME - START_TIME))
+          END_TIME=$(date +%s)
+          DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= passed)' | head -1 || echo "0")
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1 || echo "0")
-          [ -z "$PASSED" ] && PASSED=0
+          echo "$OUTPUT"
+
+          # Gradle output: "X tests completed, Y failed"
+          TOTAL=$(echo "$OUTPUT" | grep -oP '\d+(?= tests? completed)' | head -1)
+          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= failed)' | head -1)
+          [ -z "$TOTAL" ] && TOTAL=0
           [ -z "$FAILED" ] && FAILED=0
-          TOTAL=$((PASSED + FAILED))
+          PASSED=$((TOTAL - FAILED))
 
           if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
             ERROR="\"Build failed\""
@@ -279,6 +287,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          cat kt-algochat.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
@@ -301,22 +310,34 @@ jobs:
         run: bun install
 
       - name: Run tests
-        id: test
         run: |
           set +e
-          START_TIME=$(date +%s%3N)
-          OUTPUT=$(bun test 2>&1)
-          EXIT_CODE=$?
-          END_TIME=$(date +%s%3N)
-          DURATION=$((END_TIME - START_TIME))
+          START_TIME=$(date +%s)
 
-          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1 || echo "0")
-          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1 || echo "0")
+          # Check if tests exist
+          if [ -d "tests" ] || [ -d "test" ] || ls *.test.ts >/dev/null 2>&1 || ls **/*.test.ts >/dev/null 2>&1; then
+            OUTPUT=$(bun test 2>&1)
+            EXIT_CODE=$?
+          else
+            OUTPUT="No tests found"
+            EXIT_CODE=0
+          fi
+
+          END_TIME=$(date +%s)
+          DURATION=$(( (END_TIME - START_TIME) * 1000 ))
+
+          echo "$OUTPUT"
+
+          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1)
+          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1)
           [ -z "$PASSED" ] && PASSED=0
           [ -z "$FAILED" ] && FAILED=0
           TOTAL=$((PASSED + FAILED))
 
-          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
+          # No tests is not an error for early-stage projects
+          if [ "$OUTPUT" = "No tests found" ]; then
+            ERROR="null"
+          elif [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
             ERROR="\"Build failed\""
           else
             ERROR="null"
@@ -334,6 +355,7 @@ jobs:
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
+          cat algochat-web.json
 
       - name: Upload result
         uses: actions/upload-artifact@v4
@@ -367,7 +389,8 @@ jobs:
               done
             fi
           done
-          ls -la test-results/
+          echo "=== Test Results ==="
+          cat test-results/*.json
 
       - name: Generate status page
         run: bun scripts/generate-status.ts
