@@ -2,38 +2,56 @@
   "implementations": [
     {
       "id": "swift-algochat",
-      "name": "Swift Implementation",
+      "name": "swift-algochat",
       "language": "Swift",
       "repo": "CorvidLabs/swift-algochat",
       "status": "production",
-      "description": "Full-featured library for iOS/macOS/Linux",
-      "testCommand": "swift test --filter \"ChatEnvelope|MessageEncryptor|KeyDerivation|KeyStorage\""
-    },
-    {
-      "id": "ts-algochat",
-      "name": "TypeScript Implementation",
-      "language": "TypeScript",
-      "repo": "CorvidLabs/ts-algochat",
-      "status": "production",
-      "description": "Full-featured library for Node.js and browsers",
-      "testCommand": "bun test"
-    },
-    {
-      "id": "algochat-app",
-      "name": "AlgoChat App",
-      "language": "Swift",
-      "repo": "CorvidLabs/algochat-app",
-      "status": "active-dev",
-      "description": "SwiftUI native app for iOS/macOS",
+      "description": "iOS, macOS, Linux",
       "testCommand": "swift test"
     },
     {
+      "id": "ts-algochat",
+      "name": "ts-algochat",
+      "language": "TypeScript",
+      "repo": "CorvidLabs/ts-algochat",
+      "status": "production",
+      "description": "Node.js, Browsers",
+      "testCommand": "bun test"
+    },
+    {
+      "id": "py-algochat",
+      "name": "py-algochat",
+      "language": "Python",
+      "repo": "CorvidLabs/py-algochat",
+      "status": "production",
+      "description": "Python 3.10+",
+      "testCommand": "pytest"
+    },
+    {
+      "id": "rs-algochat",
+      "name": "rs-algochat",
+      "language": "Rust",
+      "repo": "CorvidLabs/rs-algochat",
+      "status": "production",
+      "description": "Cargo crate",
+      "testCommand": "cargo test"
+    },
+    {
+      "id": "kt-algochat",
+      "name": "kt-algochat",
+      "language": "Kotlin",
+      "repo": "CorvidLabs/kt-algochat",
+      "status": "production",
+      "description": "JVM, Android",
+      "testCommand": "gradle test"
+    },
+    {
       "id": "algochat-platform",
-      "name": "AlgoChat Platform",
-      "language": "Swift/Angular",
+      "name": "algochat-platform",
+      "language": "Swift + Angular",
       "repo": "CorvidLabs/algochat-platform",
       "status": "early-stage",
-      "description": "Vapor backend + Angular web client",
+      "description": "Vapor backend, Angular web",
       "testCommand": null
     }
   ]

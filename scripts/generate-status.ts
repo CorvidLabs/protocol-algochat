@@ -2,8 +2,6 @@
  * Generate status.html from test results
  *
  * Usage: bun scripts/generate-status.ts [--results-dir <path>]
- *
- * Reads test results from JSON files and generates a status dashboard page.
  */
 
 interface Implementation {
@@ -36,20 +34,16 @@ const resultsDir = process.argv.includes("--results-dir")
     : "./test-results";
 
 async function loadImplementations(): Promise<Implementation[]> {
-    const configPath = "./implementations.json";
-    const file = Bun.file(configPath);
+    const file = Bun.file("./implementations.json");
     const config: ImplementationsConfig = await file.json();
     return config.implementations;
 }
 
 async function loadTestResults(implementationId: string): Promise<TestResult | null> {
-    const resultPath = `${resultsDir}/${implementationId}.json`;
-    const file = Bun.file(resultPath);
-
+    const file = Bun.file(`${resultsDir}/${implementationId}.json`);
     if (!(await file.exists())) {
         return null;
     }
-
     try {
         return await file.json();
     } catch {
@@ -57,14 +51,22 @@ async function loadTestResults(implementationId: string): Promise<TestResult | n
     }
 }
 
-function getStatusBadgeClass(status: Implementation["status"]): string {
+function escapeHtml(text: string): string {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+function getStatusClass(status: Implementation["status"]): string {
     switch (status) {
         case "production":
             return "is-success";
         case "active-dev":
             return "is-warning";
         case "early-stage":
-            return "is-error";
+            return "is-primary";
     }
 }
 
@@ -73,136 +75,63 @@ function getStatusLabel(status: Implementation["status"]): string {
         case "production":
             return "Production";
         case "active-dev":
-            return "Active Dev";
+            return "Active";
         case "early-stage":
-            return "Early Stage";
+            return "Early";
     }
 }
 
-function getTestStatusClass(result: TestResult | null): string {
-    if (result === null) {
-        return "";
-    }
-    if (result.error !== null) {
-        return "is-error";
-    }
-    if (result.failed > 0) {
-        return "is-warning";
-    }
-    return "is-success";
-}
-
-function getProgressClass(result: TestResult | null): string {
-    if (result === null) {
-        return "is-pattern";
-    }
-    if (result.error !== null) {
-        return "is-error";
-    }
-    if (result.failed > 0) {
-        return "is-warning";
-    }
-    return "is-success";
-}
-
-function formatDuration(ms: number): string {
-    if (ms < 1000) {
-        return `${ms}ms`;
-    }
-    return `${(ms / 1000).toFixed(1)}s`;
-}
-
-function generateImplementationCard(impl: Implementation, result: TestResult | null): string {
-    const statusClass = getStatusBadgeClass(impl.status);
+function generateTableRow(impl: Implementation, result: TestResult | null): string {
+    const statusClass = getStatusClass(impl.status);
     const statusLabel = getStatusLabel(impl.status);
-    const testStatusClass = getTestStatusClass(result);
-    const progressClass = getProgressClass(result);
 
-    let testInfo: string;
-    let progressBar: string;
-    let progressPercent = 0;
-
+    let testsCell: string;
     if (impl.testCommand === null) {
-        testInfo = `<span class="nes-text">No Tests</span>`;
-        progressBar = `<progress class="nes-progress is-pattern" value="0" max="100"></progress>`;
+        testsCell = `<span class="test-status test-none">-</span>`;
     } else if (result === null) {
-        testInfo = `<span class="nes-text">Pending</span>`;
-        progressBar = `<progress class="nes-progress is-pattern" value="0" max="100"></progress>`;
+        testsCell = `<span class="test-status test-pending">...</span>`;
     } else if (result.error !== null) {
-        testInfo = `<span class="nes-text is-error">Error: ${escapeHtml(result.error)}</span>`;
-        progressBar = `<progress class="nes-progress is-error" value="100" max="100"></progress>`;
+        testsCell = `<span class="test-status test-error">ERR</span>`;
+    } else if (result.failed > 0) {
+        testsCell = `<span class="test-status test-warning">${result.passed}/${result.total}</span>`;
     } else {
-        progressPercent = result.total > 0 ? Math.round((result.passed / result.total) * 100) : 0;
-        const testText = result.failed > 0
-            ? `<span class="nes-text is-warning">${result.passed}/${result.total} passed</span>`
-            : `<span class="nes-text is-success">${result.passed}/${result.total} passed</span>`;
-        const durationText = `<span class="duration">${formatDuration(result.duration)}</span>`;
-        testInfo = `${testText} ${durationText}`;
-        progressBar = `<progress class="nes-progress ${progressClass}" value="${progressPercent}" max="100"></progress>`;
+        testsCell = `<span class="test-status test-success">${result.passed}/${result.total}</span>`;
     }
-
-    const timestamp = result?.timestamp
-        ? `<div class="card-timestamp">Updated: ${new Date(result.timestamp).toLocaleString()}</div>`
-        : "";
 
     return `
-        <div class="impl-card">
-            <div class="card-header">
-                <div class="card-title">
-                    <strong>${escapeHtml(impl.name)}</strong>
-                    <span class="nes-badge"><span class="${statusClass}">${statusLabel}</span></span>
-                </div>
-                <div class="card-language">${escapeHtml(impl.language)}</div>
-            </div>
-            <div class="card-description">${escapeHtml(impl.description)}</div>
-            <div class="card-tests">
-                ${testInfo}
-                ${progressBar}
-            </div>
-            <div class="card-links">
-                <a href="https://github.com/${impl.repo}" class="nes-btn is-primary is-small">GitHub</a>
-            </div>
-            ${timestamp}
-        </div>
-    `;
-}
-
-function escapeHtml(text: string): string {
-    return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+                <tr>
+                    <td>
+                        <a href="https://github.com/${impl.repo}">${escapeHtml(impl.name)}</a>
+                    </td>
+                    <td>${escapeHtml(impl.language)}</td>
+                    <td>${escapeHtml(impl.description)}</td>
+                    <td><span class="nes-text ${statusClass}">${statusLabel}</span></td>
+                    <td class="tests-col">${testsCell}</td>
+                </tr>`;
 }
 
 function generateSvgBadge(impl: Implementation, result: TestResult | null): string {
-    let label: string;
-    let color: string;
     let value: string;
+    let color: string;
 
     if (impl.testCommand === null) {
-        label = impl.id;
         value = "no tests";
         color = "#6c757d";
     } else if (result === null) {
-        label = impl.id;
         value = "pending";
         color = "#6c757d";
     } else if (result.error !== null) {
-        label = impl.id;
         value = "error";
         color = "#e76e55";
     } else if (result.failed > 0) {
-        label = impl.id;
         value = `${result.passed}/${result.total}`;
         color = "#f7d51d";
     } else {
-        label = impl.id;
         value = `${result.passed}/${result.total}`;
         color = "#92cc41";
     }
 
+    const label = impl.id;
     const labelWidth = label.length * 6.5 + 10;
     const valueWidth = value.length * 6.5 + 10;
     const totalWidth = labelWidth + valueWidth;
@@ -230,259 +159,175 @@ function generateSvgBadge(impl: Implementation, result: TestResult | null): stri
 }
 
 function generateHtml(implementations: Implementation[], results: Map<string, TestResult | null>): string {
-    const cards = implementations
-        .map((impl) => generateImplementationCard(impl, results.get(impl.id) ?? null))
+    const rows = implementations
+        .map((impl) => generateTableRow(impl, results.get(impl.id) ?? null))
         .join("\n");
 
-    const totalTests = Array.from(results.values())
-        .filter((r): r is TestResult => r !== null && r.error === null)
-        .reduce((sum, r) => sum + r.total, 0);
-    const totalPassed = Array.from(results.values())
-        .filter((r): r is TestResult => r !== null && r.error === null)
-        .reduce((sum, r) => sum + r.passed, 0);
-    const totalFailed = Array.from(results.values())
-        .filter((r): r is TestResult => r !== null && r.error === null)
-        .reduce((sum, r) => sum + r.failed, 0);
+    const testedImpls = Array.from(results.values()).filter(
+        (r): r is TestResult => r !== null && r.error === null
+    );
+    const totalPassed = testedImpls.reduce((sum, r) => sum + r.passed, 0);
+    const totalFailed = testedImpls.reduce((sum, r) => sum + r.failed, 0);
+    const totalTests = testedImpls.reduce((sum, r) => sum + r.total, 0);
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlgoChat Implementation Status</title>
+    <title>AlgoChat Status</title>
     <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Press Start 2P', cursive;
-        }
+        * { font-family: 'Press Start 2P', cursive; }
         body {
             background-color: #212529;
             color: #f8f9fa;
             padding: 20px;
-            font-size: 12px;
-            line-height: 1.8;
+            font-size: 11px;
+            line-height: 1.6;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .nes-container {
-            background-color: #2d3238;
-        }
-        .nes-container.is-dark {
-            background-color: #212529;
-        }
+        .container { max-width: 960px; margin: 0 auto; }
+        .nes-container { background-color: #2d3238; }
+        .nes-container.is-dark { background-color: #212529; }
         .nes-container.with-title > .title {
             background-color: #212529;
             color: #92cc41;
         }
-        h1, h2, h3 {
-            color: #92cc41;
-        }
-        a {
-            color: #209cee;
-        }
-        a:hover {
-            color: #92cc41;
-        }
+        h1 { color: #92cc41; font-size: 18px; }
+        a { color: #209cee; }
+        a:hover { color: #92cc41; }
+
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
-        .header i {
-            font-size: 64px;
-            color: #f7d51d;
-        }
-        .summary-stats {
+        .header i { font-size: 48px; color: #f7d51d; }
+        .header p { color: #adb5bd; font-size: 10px; margin-top: 8px; }
+
+        .summary {
             display: flex;
             justify-content: center;
-            gap: 32px;
+            gap: 48px;
             margin: 24px 0;
-            flex-wrap: wrap;
         }
-        .stat-box {
-            text-align: center;
-            padding: 16px 24px;
-            background-color: #1a1d21;
-            border: 2px solid #3d4348;
-        }
+        .stat { text-align: center; }
         .stat-value {
-            font-size: 24px;
+            font-size: 28px;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
-        .stat-value.is-success {
+        .stat-value.green { color: #92cc41; }
+        .stat-value.red { color: #e76e55; }
+        .stat-label { font-size: 8px; color: #6c757d; }
+
+        .impl-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+        .impl-table th {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 2px solid #92cc41;
             color: #92cc41;
-        }
-        .stat-value.is-warning {
-            color: #f7d51d;
-        }
-        .stat-value.is-error {
-            color: #e76e55;
-        }
-        .stat-label {
-            font-size: 8px;
-            color: #adb5bd;
-        }
-        .impl-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin: 20px 0;
-        }
-        @media (max-width: 700px) {
-            .impl-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        .impl-card {
-            padding: 16px;
-            background-color: #1a1d21;
-            border: 2px solid #3d4348;
-        }
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .card-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .card-title strong {
-            color: #92cc41;
-            font-size: 11px;
-        }
-        .card-language {
-            color: #6c757d;
-            font-size: 8px;
-        }
-        .card-description {
-            color: #adb5bd;
-            font-size: 9px;
-            margin-bottom: 16px;
-        }
-        .card-tests {
-            margin-bottom: 16px;
-        }
-        .card-tests .nes-text {
-            display: block;
-            margin-bottom: 8px;
             font-size: 9px;
         }
-        .card-tests .duration {
-            color: #6c757d;
-            font-size: 8px;
-            margin-left: 8px;
+        .impl-table td {
+            padding: 12px 8px;
+            border-bottom: 1px solid #3d4348;
+            vertical-align: middle;
         }
-        .card-tests .nes-progress {
-            height: 16px;
-        }
-        .card-links {
-            display: flex;
-            gap: 8px;
-        }
-        .card-links .nes-btn {
-            font-size: 8px;
+        .impl-table tr:hover td { background-color: #2d3238; }
+        .impl-table a { text-decoration: none; }
+        .impl-table a:hover { text-decoration: underline; }
+
+        .tests-col { text-align: center; }
+        .test-status {
+            display: inline-block;
             padding: 4px 8px;
+            font-size: 9px;
+            min-width: 48px;
+            text-align: center;
         }
-        .card-timestamp {
-            margin-top: 12px;
-            font-size: 7px;
-            color: #6c757d;
-        }
-        .nes-badge span {
-            font-size: 7px;
-            padding: 2px 6px;
-        }
-        .links-section {
+        .test-success { color: #92cc41; }
+        .test-warning { color: #f7d51d; }
+        .test-error { color: #e76e55; }
+        .test-none { color: #6c757d; }
+        .test-pending { color: #6c757d; }
+
+        .links {
             display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
             justify-content: center;
-            margin-top: 30px;
+            gap: 16px;
+            margin-top: 32px;
         }
+        .links .nes-btn { font-size: 10px; }
+
         footer {
             text-align: center;
             margin-top: 40px;
-            padding: 20px;
+            padding: 16px;
             color: #6c757d;
-            font-size: 10px;
+            font-size: 8px;
         }
-        .corvid-logo {
-            color: #ff6b35;
-        }
-        .section {
-            margin-top: 24px;
-        }
-        .back-link {
-            margin-bottom: 20px;
-        }
-        .back-link a {
-            font-size: 10px;
-        }
+        .corvid { color: #ff6b35; }
+
+        .section { margin-top: 24px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="back-link">
-            <a href="index.html">&lt; Back to Protocol</a>
-        </div>
-
         <div class="header">
-            <i class="nes-icon is-large trophy"></i>
+            <i class="nes-icon trophy"></i>
             <h1>Implementation Status</h1>
-            <p>Test results across all AlgoChat implementations</p>
+            <p>Test results for AlgoChat protocol implementations</p>
         </div>
 
         <section class="nes-container with-title is-dark">
             <p class="title">Summary</p>
-            <div class="summary-stats">
-                <div class="stat-box">
-                    <span class="stat-value">${implementations.length}</span>
-                    <span class="stat-label">Implementations</span>
+            <div class="summary">
+                <div class="stat">
+                    <span class="stat-value green">${totalPassed}</span>
+                    <span class="stat-label">Passed</span>
                 </div>
-                <div class="stat-box">
-                    <span class="stat-value is-success">${totalPassed}</span>
-                    <span class="stat-label">Tests Passed</span>
+                <div class="stat">
+                    <span class="stat-value ${totalFailed > 0 ? "red" : ""}">${totalFailed}</span>
+                    <span class="stat-label">Failed</span>
                 </div>
-                <div class="stat-box">
-                    <span class="stat-value ${totalFailed > 0 ? "is-error" : ""}">${totalFailed}</span>
-                    <span class="stat-label">Tests Failed</span>
-                </div>
-                <div class="stat-box">
+                <div class="stat">
                     <span class="stat-value">${totalTests}</span>
-                    <span class="stat-label">Total Tests</span>
+                    <span class="stat-label">Total</span>
                 </div>
             </div>
         </section>
 
         <section class="nes-container with-title is-dark section">
             <p class="title">Implementations</p>
-            <div class="impl-grid">
-                ${cards}
-            </div>
+            <table class="impl-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Language</th>
+                        <th>Platforms</th>
+                        <th>Status</th>
+                        <th class="tests-col">Tests</th>
+                    </tr>
+                </thead>
+                <tbody>
+${rows}
+                </tbody>
+            </table>
         </section>
 
-        <div class="links-section">
-            <a href="index.html" class="nes-btn is-primary">
-                Protocol Docs
-            </a>
-            <a href="https://github.com/CorvidLabs/protocol-algochat" class="nes-btn is-success">
-                GitHub
-            </a>
+        <div class="links">
+            <a href="index.html" class="nes-btn is-primary">Protocol</a>
+            <a href="https://github.com/CorvidLabs/protocol-algochat" class="nes-btn">GitHub</a>
         </div>
 
         <footer>
-            <p>Made with <i class="nes-icon is-small heart"></i> by <span class="corvid-logo">Corvid Labs</span></p>
-            <p><a href="https://github.com/CorvidLabs">github.com/CorvidLabs</a></p>
-            <p style="margin-top: 12px;">Last generated: ${new Date().toISOString()}</p>
+            <p>Made with <i class="nes-icon is-small heart"></i> by <span class="corvid">Corvid Labs</span></p>
+            <p style="margin-top: 8px;">Updated: ${new Date().toISOString().split("T")[0]}</p>
         </footer>
     </div>
 </body>
@@ -499,11 +344,11 @@ async function main(): Promise<void> {
     for (const impl of implementations) {
         const result = await loadTestResults(impl.id);
         results.set(impl.id, result);
-        if (result !== null) {
-            console.log(`  ${impl.id}: ${result.passed}/${result.total} passed`);
-        } else {
-            console.log(`  ${impl.id}: no results`);
-        }
+        console.log(
+            result !== null
+                ? `  ${impl.id}: ${result.passed}/${result.total} passed`
+                : `  ${impl.id}: no results`
+        );
     }
 
     console.log("Generating status.html...");
