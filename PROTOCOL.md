@@ -11,7 +11,7 @@ AlgoChat is an end-to-end encrypted messaging protocol that uses the Algorand bl
 
 1. **Privacy** - Only sender and recipient can read messages
 2. **Forward Secrecy** - Compromised keys don't expose past messages
-3. **Bidirectional Decryption** - Sender can decrypt their own sent messages
+3. **Bidirectional Decryption** - Sender can decrypt their own sent messages. This enables chat history display on the sender's device without storing plaintext locally—messages can be re-decrypted from the blockchain on any authorized device.
 4. **Immutability** - Messages cannot be altered after transmission
 5. **Decentralization** - No trusted third parties required
 6. **Simplicity** - Minimal protocol complexity
@@ -25,6 +25,8 @@ AlgoChat is an end-to-end encrypted messaging protocol that uses the Algorand bl
 | Key Derivation | HKDF-SHA256 | RFC 5869 |
 
 ## 4. Key Derivation
+
+See [TEST-VECTORS.md](./TEST-VECTORS.md#1-key-derivation) for canonical test vectors to verify your implementation.
 
 ### 4.1 Encryption Key Pair
 
@@ -205,6 +207,16 @@ To message someone, you need their X25519 public key. Discovery methods:
 1. **Transaction History** - Scan recipient's sent transactions for `sender_pubkey` in envelopes
 2. **Key Publish Transaction** - Look for key-publish messages sent to self
 3. **Out-of-Band** - Exchange keys through another channel
+
+**Filtering for AlgoChat transactions:**
+
+When querying the indexer, filter by note prefix `0x0101` (version byte + protocol byte):
+
+```
+notePrefix = [0x01, 0x01]
+```
+
+This efficiently filters transactions to only those with AlgoChat envelopes. See [IMPLEMENTATION.md](./IMPLEMENTATION.md) for pseudocode examples.
 
 ## 10. Security Considerations
 

@@ -50,8 +50,26 @@
 Implementations should:
 - Store private keys in secure enclaves when available
 - Use biometric protection for key access
-- Clear keys from memory after use
+- Clear keys from memory after use (see Memory Clearing below)
 - Never log or transmit private keys
+
+### Memory Clearing
+
+Sensitive data (private keys, symmetric keys, plaintext) must be cleared from memory after use. Standard deallocation does not guarantee memory is zeroed.
+
+**Language-specific guidance:**
+
+| Language | Recommended Approach |
+|----------|---------------------|
+| C/C++ | `sodium_memzero()` (libsodium) or `explicit_bzero()` |
+| Rust | `zeroize` crate with `Zeroizing<T>` wrapper |
+| Swift | `Data.resetBytes(in:)` or SecureBytes patterns |
+| TypeScript/JS | Overwrite buffer contents, then discard reference |
+| Python | `ctypes.memset()` or `secrets` module patterns |
+| Kotlin/Java | Overwrite `ByteArray` contents before GC |
+| Go | `crypto/subtle.ConstantTimeCopy` to zero, or `memguard` |
+
+**Important**: Garbage-collected languages cannot guarantee immediate clearing. Use native bindings (e.g., libsodium wrappers) for maximum security.
 
 ### Key Discovery
 
@@ -80,11 +98,15 @@ Implementations should:
 
 ### For Implementers
 
-1. Use audited cryptographic libraries
-2. Implement constant-time operations where applicable
+1. Use audited cryptographic libraries (libsodium, @noble/ciphers, CryptoKit, etc.)
+2. Implement constant-time operations where applicable:
+   - Authentication tag comparison (use `crypto_verify_*` or `timingSafeEqual`)
+   - Key comparison operations
+   - Any branching on secret data
 3. Validate all inputs before processing
-4. Handle errors without leaking information
-5. Clear sensitive data from memory
+4. Handle errors without leaking information (same error response for all auth failures)
+5. Clear sensitive data from memory (see Memory Clearing section above)
+6. Use secure random number generators (`/dev/urandom`, `SecRandomCopyBytes`, `crypto.getRandomValues`)
 
 ### For Users
 
@@ -96,10 +118,18 @@ Implementations should:
 
 ## Reporting Vulnerabilities
 
-Please report security vulnerabilities as GitHub issues.
+**Do NOT report security vulnerabilities as public GitHub issues.**
+
+Please use one of these private channels:
+
+1. **GitHub Security Advisory** (preferred): [Report a vulnerability](https://github.com/CorvidLabs/protocol-algochat/security/advisories/new)
+2. **Email**: security@corvidlabs.io (PGP key available on request)
 
 Include:
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact
 - Suggested fix (if any)
+- Your contact information for follow-up
+
+We aim to acknowledge reports within 48 hours and provide an initial assessment within 7 days. We will coordinate disclosure timing with you.

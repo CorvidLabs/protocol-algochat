@@ -52,6 +52,8 @@ Each message costs ~0.001 ALGO in transaction fees. However, Algorand staking re
 | 30,000 | ~1,500 ALGO | ~1,500,000 |
 | 100,000 | ~5,000 ALGO | ~5,000,000 |
 
+*Note: APY rates are illustrative and vary by governance period. Actual rewards depend on total network participation and governance proposals. Check current rates at [Algorand Foundation](https://algorand.foundation).*
+
 Users with less than 30K ALGO can participate through liquid staking or pools. The more you contribute to Algorand infrastructure, the more utility you extract—active participants get free encrypted communications, while casual users pay minimal per-message fees.
 
 ## Security Properties
