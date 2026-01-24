@@ -34,15 +34,25 @@ Be aware of what this protocol cannot do:
 
 ## Economics
 
-Each message costs ~0.001 ALGO in transaction fees. However, Algorand staking rewards can offset or exceed this cost. Node operators and stakers effectively get unlimited messaging as a byproduct of network participation.
+Each message costs ~0.001 ALGO in transaction fees. However, Algorand staking rewards can offset or exceed this cost, effectively making messaging free for participants.
 
-| ALGO Staked | Annual Rewards (~5%) | Messages Funded/Year |
-|-------------|----------------------|----------------------|
-| 1,000 | ~50 ALGO | ~50,000 |
-| 10,000 | ~500 ALGO | ~500,000 |
+**Staking Options:**
+
+| Method | Minimum | Notes |
+|--------|---------|-------|
+| Solo staking | 30,000 ALGO | Run your own node |
+| Delegated staking | 30,000 ALGO | Delegate to a node operator |
+| Liquid staking | Any amount | Via protocols like Folks Finance |
+| Staking pools | Any amount | Community-operated pools |
+
+**Example at ~5% APY:**
+
+| ALGO Staked | Annual Rewards | Messages Funded/Year |
+|-------------|----------------|----------------------|
+| 30,000 | ~1,500 ALGO | ~1,500,000 |
 | 100,000 | ~5,000 ALGO | ~5,000,000 |
 
-**The more you contribute to Algorand infrastructure, the more utility you extract.** This aligns incentives: active network participants get free encrypted communications, while casual users pay minimal per-message fees.
+Users with less than 30K ALGO can participate through liquid staking or pools. The more you contribute to Algorand infrastructure, the more utility you extract—active participants get free encrypted communications, while casual users pay minimal per-message fees.
 
 ## Security Properties
 
