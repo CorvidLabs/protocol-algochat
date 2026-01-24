@@ -14,7 +14,7 @@
       "name": "ts-algochat",
       "language": "TypeScript",
       "repo": "CorvidLabs/ts-algochat",
-      "status": "production",
+      "status": "active-dev",
       "description": "Node.js, Browsers",
       "testCommand": "bun test"
     },
@@ -23,7 +23,7 @@
       "name": "py-algochat",
       "language": "Python",
       "repo": "CorvidLabs/py-algochat",
-      "status": "production",
+      "status": "active-dev",
       "description": "Python 3.10+",
       "testCommand": "pytest"
     },
@@ -32,7 +32,7 @@
       "name": "rs-algochat",
       "language": "Rust",
       "repo": "CorvidLabs/rs-algochat",
-      "status": "production",
+      "status": "active-dev",
       "description": "Cargo crate",
       "testCommand": "cargo test"
     },
@@ -41,7 +41,7 @@
       "name": "kt-algochat",
       "language": "Kotlin",
       "repo": "CorvidLabs/kt-algochat",
-      "status": "production",
+      "status": "active-dev",
       "description": "JVM, Android",
       "testCommand": "gradle test"
     },
