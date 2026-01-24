@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="143.5" height="20">
+  <linearGradient id="b" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <mask id="a">
+    <rect width="143.5" height="20" rx="3" fill="#fff"/>
+  </mask>
+  <g mask="url(#a)">
+    <rect width="101" height="20" fill="#555"/>
+    <rect x="101" width="42.5" height="20" fill="#92cc41"/>
+    <rect width="143.5" height="20" fill="url(#b)"/>
+  </g>
+  <g fill="#fff" text-anchor="middle" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="11">
+    <text x="50.5" y="15" fill="#010101" fill-opacity=".3">swift-algochat</text>
+    <text x="50.5" y="14">swift-algochat</text>
+    <text x="122.25" y="15" fill="#010101" fill-opacity=".3">25/25</text>
+    <text x="122.25" y="14">25/25</text>
+  </g>
+</svg>

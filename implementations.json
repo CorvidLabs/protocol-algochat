@@ -1,0 +1,40 @@
+{
+  "implementations": [
+    {
+      "id": "swift-algochat",
+      "name": "Swift Implementation",
+      "language": "Swift",
+      "repo": "CorvidLabs/swift-algochat",
+      "status": "production",
+      "description": "Full-featured library for iOS/macOS/Linux",
+      "testCommand": "swift test --filter \"ChatEnvelope|MessageEncryptor|KeyDerivation|KeyStorage\""
+    },
+    {
+      "id": "ts-algochat",
+      "name": "TypeScript Implementation",
+      "language": "TypeScript",
+      "repo": "CorvidLabs/ts-algochat",
+      "status": "production",
+      "description": "Full-featured library for Node.js and browsers",
+      "testCommand": "bun test"
+    },
+    {
+      "id": "algochat-app",
+      "name": "AlgoChat App",
+      "language": "Swift",
+      "repo": "CorvidLabs/algochat-app",
+      "status": "active-dev",
+      "description": "SwiftUI native app for iOS/macOS",
+      "testCommand": "swift test"
+    },
+    {
+      "id": "algochat-platform",
+      "name": "AlgoChat Platform",
+      "language": "Swift/Angular",
+      "repo": "CorvidLabs/algochat-platform",
+      "status": "early-stage",
+      "description": "Vapor backend + Angular web client",
+      "testCommand": null
+    }
+  ]
+}

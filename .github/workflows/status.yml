@@ -1,0 +1,350 @@
+name: Implementation Status
+
+on:
+  schedule:
+    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  test-swift-algochat:
+    runs-on: macos-latest
+    outputs:
+      result: ${{ steps.test.outputs.result }}
+    steps:
+      - name: Checkout swift-algochat
+        uses: actions/checkout@v4
+        with:
+          repository: CorvidLabs/swift-algochat
+        continue-on-error: true
+        id: checkout
+
+      - name: Run tests
+        id: test
+        if: steps.checkout.outcome == 'success'
+        run: |
+          set +e
+          START_TIME=$(date +%s%3N)
+          OUTPUT=$(swift test --filter "ChatEnvelope|MessageEncryptor|KeyDerivation|KeyStorage" 2>&1)
+          EXIT_CODE=$?
+          END_TIME=$(date +%s%3N)
+          DURATION=$((END_TIME - START_TIME))
+
+          # Parse test results from Swift test output
+          PASSED=$(echo "$OUTPUT" | grep -c "Test Case.*passed")
+          FAILED=$(echo "$OUTPUT" | grep -c "Test Case.*failed")
+          TOTAL=$((PASSED + FAILED))
+
+          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
+            ERROR="Build or test execution failed"
+          else
+            ERROR="null"
+          fi
+
+          # Create JSON result
+          cat > result.json << EOF
+          {
+            "implementationId": "swift-algochat",
+            "passed": $PASSED,
+            "failed": $FAILED,
+            "skipped": 0,
+            "total": $TOTAL,
+            "duration": $DURATION,
+            "error": $ERROR,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          echo "result=$(cat result.json | tr -d '\n')" >> $GITHUB_OUTPUT
+
+      - name: Create fallback result
+        if: steps.checkout.outcome != 'success'
+        id: fallback
+        run: |
+          cat > result.json << EOF
+          {
+            "implementationId": "swift-algochat",
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "total": 0,
+            "duration": 0,
+            "error": "Repository not accessible",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+          echo "result=$(cat result.json | tr -d '\n')" >> $GITHUB_OUTPUT
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: swift-algochat-result
+          path: result.json
+
+  test-ts-algochat:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.test.outputs.result }}
+    steps:
+      - name: Checkout ts-algochat
+        uses: actions/checkout@v4
+        with:
+          repository: CorvidLabs/ts-algochat
+        continue-on-error: true
+        id: checkout
+
+      - name: Setup Bun
+        if: steps.checkout.outcome == 'success'
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        if: steps.checkout.outcome == 'success'
+        run: bun install
+
+      - name: Run tests
+        id: test
+        if: steps.checkout.outcome == 'success'
+        run: |
+          set +e
+          START_TIME=$(date +%s%3N)
+          OUTPUT=$(bun test --json 2>&1)
+          EXIT_CODE=$?
+          END_TIME=$(date +%s%3N)
+          DURATION=$((END_TIME - START_TIME))
+
+          # Try to parse JSON output from bun test
+          PASSED=$(echo "$OUTPUT" | grep -oP '"pass":\s*\K\d+' | head -1 || echo "0")
+          FAILED=$(echo "$OUTPUT" | grep -oP '"fail":\s*\K\d+' | head -1 || echo "0")
+          SKIPPED=$(echo "$OUTPUT" | grep -oP '"skip":\s*\K\d+' | head -1 || echo "0")
+
+          # Fallback: count from text output
+          if [ -z "$PASSED" ] || [ "$PASSED" = "0" ]; then
+            PASSED=$(echo "$OUTPUT" | grep -c "✓\|pass" || echo "0")
+          fi
+          if [ -z "$FAILED" ]; then
+            FAILED=$(echo "$OUTPUT" | grep -c "✗\|fail" || echo "0")
+          fi
+
+          TOTAL=$((PASSED + FAILED + SKIPPED))
+
+          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
+            ERROR="\"Build or test execution failed\""
+          else
+            ERROR="null"
+          fi
+
+          cat > result.json << EOF
+          {
+            "implementationId": "ts-algochat",
+            "passed": ${PASSED:-0},
+            "failed": ${FAILED:-0},
+            "skipped": ${SKIPPED:-0},
+            "total": ${TOTAL:-0},
+            "duration": $DURATION,
+            "error": $ERROR,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          echo "result=$(cat result.json | tr -d '\n')" >> $GITHUB_OUTPUT
+
+      - name: Create fallback result
+        if: steps.checkout.outcome != 'success'
+        run: |
+          cat > result.json << EOF
+          {
+            "implementationId": "ts-algochat",
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "total": 0,
+            "duration": 0,
+            "error": "Repository not accessible",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: ts-algochat-result
+          path: result.json
+
+  test-algochat-app:
+    runs-on: macos-latest
+    outputs:
+      result: ${{ steps.test.outputs.result }}
+    steps:
+      - name: Checkout algochat-app
+        uses: actions/checkout@v4
+        with:
+          repository: CorvidLabs/algochat-app
+        continue-on-error: true
+        id: checkout
+
+      - name: Run tests
+        id: test
+        if: steps.checkout.outcome == 'success'
+        run: |
+          set +e
+          START_TIME=$(date +%s%3N)
+          OUTPUT=$(swift test 2>&1)
+          EXIT_CODE=$?
+          END_TIME=$(date +%s%3N)
+          DURATION=$((END_TIME - START_TIME))
+
+          PASSED=$(echo "$OUTPUT" | grep -c "Test Case.*passed")
+          FAILED=$(echo "$OUTPUT" | grep -c "Test Case.*failed")
+          TOTAL=$((PASSED + FAILED))
+
+          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
+            ERROR="\"Build or test execution failed\""
+          else
+            ERROR="null"
+          fi
+
+          cat > result.json << EOF
+          {
+            "implementationId": "algochat-app",
+            "passed": $PASSED,
+            "failed": $FAILED,
+            "skipped": 0,
+            "total": $TOTAL,
+            "duration": $DURATION,
+            "error": $ERROR,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+          echo "result=$(cat result.json | tr -d '\n')" >> $GITHUB_OUTPUT
+
+      - name: Create fallback result
+        if: steps.checkout.outcome != 'success'
+        run: |
+          cat > result.json << EOF
+          {
+            "implementationId": "algochat-app",
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "total": 0,
+            "duration": 0,
+            "error": "Repository not accessible",
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: algochat-app-result
+          path: result.json
+
+  test-algochat-platform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create no-tests result
+        run: |
+          cat > result.json << EOF
+          {
+            "implementationId": "algochat-platform",
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "total": 0,
+            "duration": 0,
+            "error": null,
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOF
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: algochat-platform-result
+          path: result.json
+
+  generate-status:
+    needs: [test-swift-algochat, test-ts-algochat, test-algochat-app, test-algochat-platform]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout protocol repo
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Download all results
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Organize results
+        run: |
+          mkdir -p test-results badges
+          for dir in artifacts/*-result; do
+            if [ -d "$dir" ]; then
+              impl=$(basename "$dir" | sed 's/-result$//')
+              cp "$dir/result.json" "test-results/$impl.json"
+            fi
+          done
+          ls -la test-results/
+
+      - name: Generate status page
+        run: bun scripts/generate-status.ts
+
+      - name: Upload status artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: status-page
+          path: |
+            status.html
+            badges/
+
+  deploy:
+    needs: generate-status
+    if: always() && needs.generate-status.result == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download status page
+        uses: actions/download-artifact@v4
+        with:
+          name: status-page
+          path: ./
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

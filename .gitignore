@@ -7,3 +7,6 @@
 *.swp
 *.swo
 *~
+
+# Build artifacts
+test-results/
