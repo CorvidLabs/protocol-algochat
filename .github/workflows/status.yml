@@ -29,37 +29,40 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s)
-          # Use --verbose to get detailed output including test count summary
-          swift test --verbose 2>&1 | tee swift_output.txt
+          # Run swift test and wait for completion before parsing
+          swift test 2>&1 | tee swift_output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           END_TIME=$(date +%s)
           DURATION=$(( (END_TIME - START_TIME) * 1000 ))
 
-          echo "=== Swift test output tail ==="
-          tail -30 swift_output.txt
+          # Wait for tee to finish writing
+          sync
+
+          echo "=== Swift test output (last 40 lines) ==="
+          tail -40 swift_output.txt
+          echo "=== End of output ==="
 
           PASSED=0
           FAILED=0
 
           # Swift Testing format: "✔ Test run with 54 tests passed after X seconds"
-          # The checkmark may or may not be present depending on terminal
-          if SUMMARY_LINE=$(grep -E "(✔ )?Test run with [0-9]+ test" swift_output.txt | head -1); then
-            echo "Found Swift Testing summary: $SUMMARY_LINE"
-            PASSED=$(echo "$SUMMARY_LINE" | grep -oE '[0-9]+ tests?' | grep -oE '[0-9]+' | head -1)
-            if echo "$SUMMARY_LINE" | grep -q "failed"; then
-              FAILED=$(echo "$SUMMARY_LINE" | grep -oE '[0-9]+ failed' | grep -oE '[0-9]+' | head -1)
+          if SUMMARY_LINE=$(grep "Test run with" swift_output.txt | tail -1); then
+            echo "Found: $SUMMARY_LINE"
+            PASSED=$(echo "$SUMMARY_LINE" | grep -oE '[0-9]+' | head -1)
+            if echo "$SUMMARY_LINE" | grep -qE "[0-9]+ (issue|fail)"; then
+              FAILED=$(echo "$SUMMARY_LINE" | grep -oE '[0-9]+ (issue|fail)' | grep -oE '[0-9]+' | head -1)
             fi
-          # Fallback: XCTest "Executed X tests" (skip if 0 tests - means using Swift Testing)
-          elif EXECUTED_LINE=$(grep -E "Executed [1-9][0-9]* test" swift_output.txt | tail -1); then
+          # Fallback: XCTest "Executed X tests" (skip 0 tests)
+          elif EXECUTED_LINE=$(grep "Executed [1-9]" swift_output.txt | tail -1); then
             echo "Found XCTest: $EXECUTED_LINE"
             PASSED=$(echo "$EXECUTED_LINE" | grep -oE 'Executed [0-9]+' | grep -oE '[0-9]+')
             FAILED=$(echo "$EXECUTED_LINE" | grep -oE '[0-9]+ failure' | grep -oE '[0-9]+' | head -1)
-          # Fallback: Count individual test markers
+          # Final fallback: count unique test starts (if tests passed, exit code is 0)
           else
-            echo "Using fallback: counting markers"
-            # Count Swift Testing checkmarks or XCTest passed lines
-            PASSED=$(grep -c "✔ Test\|Test passed" swift_output.txt 2>/dev/null || echo "0")
-            FAILED=$(grep -c "✘ Test\|Test failed" swift_output.txt 2>/dev/null || echo "0")
+            if [ $EXIT_CODE -eq 0 ]; then
+              echo "Counting test starts (exit code 0)"
+              PASSED=$(grep -c "◇ Test \"" swift_output.txt | head -1 || echo "0")
+            fi
           fi
 
           [ -z "$PASSED" ] && PASSED=0
