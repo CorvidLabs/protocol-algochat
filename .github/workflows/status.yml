@@ -20,24 +20,24 @@ jobs:
   test-swift:
     runs-on: macos-latest
     steps:
-      - name: Checkout test-algochat
+      - name: Checkout swift-algochat
         uses: actions/checkout@v4
         with:
-          repository: CorvidLabs/test-algochat
-          submodules: recursive
+          repository: CorvidLabs/swift-algochat
 
       - name: Run Swift tests
         id: test
         run: |
           set +e
           START_TIME=$(date +%s%3N)
-          OUTPUT=$(swift run TestAlgoChat crypto 2>&1)
+          OUTPUT=$(swift test 2>&1)
           EXIT_CODE=$?
           END_TIME=$(date +%s%3N)
           DURATION=$((END_TIME - START_TIME))
 
-          PASSED=$(echo "$OUTPUT" | grep -c "✓\|PASS")
-          FAILED=$(echo "$OUTPUT" | grep -c "✗\|FAIL")
+          # Swift test output: "Test Case '-[Module.TestClass testName]' passed"
+          PASSED=$(echo "$OUTPUT" | grep -c "passed")
+          FAILED=$(echo "$OUTPUT" | grep -c "failed")
           TOTAL=$((PASSED + FAILED))
 
           if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
@@ -68,11 +68,10 @@ jobs:
   test-typescript:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout test-algochat
+      - name: Checkout ts-algochat
         uses: actions/checkout@v4
         with:
-          repository: CorvidLabs/test-algochat
-          submodules: recursive
+          repository: CorvidLabs/ts-algochat
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -85,7 +84,7 @@ jobs:
         run: |
           set +e
           START_TIME=$(date +%s%3N)
-          OUTPUT=$(bun test ts/crypto.test.ts 2>&1)
+          OUTPUT=$(bun test 2>&1)
           EXIT_CODE=$?
           END_TIME=$(date +%s%3N)
           DURATION=$((END_TIME - START_TIME))
@@ -124,11 +123,10 @@ jobs:
   test-python:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout test-algochat
+      - name: Checkout py-algochat
         uses: actions/checkout@v4
         with:
-          repository: CorvidLabs/test-algochat
-          submodules: recursive
+          repository: CorvidLabs/py-algochat
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -137,7 +135,6 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd py-algochat
           pip install -e ".[dev]" || pip install -e .
           pip install pytest
 
@@ -145,7 +142,6 @@ jobs:
         id: test
         run: |
           set +e
-          cd py-algochat
           START_TIME=$(date +%s%3N)
           OUTPUT=$(pytest -v 2>&1)
           EXIT_CODE=$?
@@ -164,7 +160,7 @@ jobs:
             ERROR="null"
           fi
 
-          cat > ../py-algochat.json << EOF
+          cat > py-algochat.json << EOF
           {
             "implementationId": "py-algochat",
             "passed": $PASSED,
@@ -186,11 +182,10 @@ jobs:
   test-rust:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout test-algochat
+      - name: Checkout rs-algochat
         uses: actions/checkout@v4
         with:
-          repository: CorvidLabs/test-algochat
-          submodules: recursive
+          repository: CorvidLabs/rs-algochat
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -199,7 +194,6 @@ jobs:
         id: test
         run: |
           set +e
-          cd rs-algochat
           START_TIME=$(date +%s%3N)
           OUTPUT=$(cargo test 2>&1)
           EXIT_CODE=$?
@@ -218,7 +212,7 @@ jobs:
             ERROR="null"
           fi
 
-          cat > ../rs-algochat.json << EOF
+          cat > rs-algochat.json << EOF
           {
             "implementationId": "rs-algochat",
             "passed": $PASSED,
@@ -240,11 +234,10 @@ jobs:
   test-kotlin:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout test-algochat
+      - name: Checkout kt-algochat
         uses: actions/checkout@v4
         with:
-          repository: CorvidLabs/test-algochat
-          submodules: recursive
+          repository: CorvidLabs/kt-algochat
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -256,7 +249,6 @@ jobs:
         id: test
         run: |
           set +e
-          cd kt-algochat
           START_TIME=$(date +%s%3N)
           OUTPUT=$(./gradlew test 2>&1 || gradle test 2>&1)
           EXIT_CODE=$?
@@ -275,7 +267,7 @@ jobs:
             ERROR="null"
           fi
 
-          cat > ../kt-algochat.json << EOF
+          cat > kt-algochat.json << EOF
           {
             "implementationId": "kt-algochat",
             "passed": $PASSED,
@@ -294,20 +286,51 @@ jobs:
           name: kt-algochat-result
           path: kt-algochat.json
 
-  placeholder-platform:
+  test-web:
     runs-on: ubuntu-latest
     steps:
-      - name: Create placeholder
+      - name: Checkout algochat-web
+        uses: actions/checkout@v4
+        with:
+          repository: CorvidLabs/algochat-web
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        id: test
         run: |
-          cat > algochat-platform.json << EOF
+          set +e
+          START_TIME=$(date +%s%3N)
+          OUTPUT=$(bun test 2>&1)
+          EXIT_CODE=$?
+          END_TIME=$(date +%s%3N)
+          DURATION=$((END_TIME - START_TIME))
+
+          PASSED=$(echo "$OUTPUT" | grep -oP '\d+(?= pass)' | head -1 || echo "0")
+          FAILED=$(echo "$OUTPUT" | grep -oP '\d+(?= fail)' | head -1 || echo "0")
+          [ -z "$PASSED" ] && PASSED=0
+          [ -z "$FAILED" ] && FAILED=0
+          TOTAL=$((PASSED + FAILED))
+
+          if [ $EXIT_CODE -ne 0 ] && [ $TOTAL -eq 0 ]; then
+            ERROR="\"Build failed\""
+          else
+            ERROR="null"
+          fi
+
+          cat > algochat-web.json << EOF
           {
-            "implementationId": "algochat-platform",
-            "passed": 0,
-            "failed": 0,
+            "implementationId": "algochat-web",
+            "passed": $PASSED,
+            "failed": $FAILED,
             "skipped": 0,
-            "total": 0,
-            "duration": 0,
-            "error": null,
+            "total": $TOTAL,
+            "duration": $DURATION,
+            "error": $ERROR,
             "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           }
           EOF
@@ -315,11 +338,11 @@ jobs:
       - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: algochat-platform-result
-          path: algochat-platform.json
+          name: algochat-web-result
+          path: algochat-web.json
 
   generate-status:
-    needs: [test-swift, test-typescript, test-python, test-rust, test-kotlin, placeholder-platform]
+    needs: [test-swift, test-typescript, test-python, test-rust, test-kotlin, test-web]
     if: always()
     runs-on: ubuntu-latest
     steps:

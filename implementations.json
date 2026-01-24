@@ -46,13 +46,13 @@
       "testCommand": "gradle test"
     },
     {
-      "id": "algochat-platform",
-      "name": "algochat-platform",
-      "language": "Swift + Angular",
-      "repo": "CorvidLabs/algochat-platform",
-      "status": "early-stage",
-      "description": "Vapor backend, Angular web",
-      "testCommand": null
+      "id": "algochat-web",
+      "name": "algochat-web",
+      "language": "Angular",
+      "repo": "CorvidLabs/algochat-web",
+      "status": "active-dev",
+      "description": "Web app with NES.css",
+      "testCommand": "bun test"
     }
   ]
 }
