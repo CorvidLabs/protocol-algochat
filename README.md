@@ -1,7 +1,7 @@
 # AlgoChat Protocol
 
 [![License](https://img.shields.io/github/license/CorvidLabs/protocol-algochat)](https://github.com/CorvidLabs/protocol-algochat/blob/main/LICENSE)
-[![Status](https://img.shields.io/badge/protocol-1.0-green)](https://corvidlabs.github.io/protocol-algochat/)
+[![Status](https://img.shields.io/badge/protocol-1.1-green)](https://corvidlabs.github.io/protocol-algochat/)
 
 Encrypted, immutable annotations for Algorand transactions.
 
@@ -25,7 +25,7 @@ Be aware of what this protocol cannot do:
 
 | Limitation | Details |
 |------------|---------|
-| **882-byte messages** | Maximum plaintext size; no images, files, or long texts |
+| **882-byte messages** | Maximum plaintext size (standard mode); 878 bytes in PSK mode. No images, files, or long texts. |
 | **Metadata visible** | Sender/recipient addresses and timing are public on-chain |
 | **No message deletion** | Blockchain is immutable; messages persist forever |
 | **Cost per message** | ~0.001 ALGO transaction fee (see [Economics](#economics)) |
@@ -63,7 +63,9 @@ Users with less than 30K ALGO can participate through liquid staking or pools. T
 | Message content confidentiality | Protected (E2EE) |
 | Message integrity | Protected (authenticated encryption) |
 | Forward secrecy | Protected (ephemeral keys per message) |
-| Replay attacks | Protected (blockchain uniqueness) |
+| Replay attacks | Protected (blockchain uniqueness + PSK counter) |
+| Quantum resistance (key exchange) | Optional (PSK mode provides defense-in-depth) |
+| PSK session forward secrecy | Optional (100-message session boundaries in PSK mode) |
 | Metadata privacy | **Not protected** (addresses, timing visible) |
 | Traffic analysis | **Not protected** |
 
@@ -103,7 +105,7 @@ See the [Implementation Status Dashboard](https://corvidlabs.github.io/protocol-
 
 These are the same primitives used by Signal, WireGuard, and TLS 1.3.
 
-### Wire Format (v1)
+### Wire Format (v1 Standard - `0x01`)
 
 ```
 [version: 1][protocol: 1][sender_pubkey: 32][ephemeral_pubkey: 32][nonce: 12][encrypted_sender_key: 48][ciphertext: variable]
@@ -112,6 +114,16 @@ These are the same primitives used by Signal, WireGuard, and TLS 1.3.
 - **Header size**: 126 bytes (fixed overhead)
 - **Max plaintext**: 882 bytes
 - **Total envelope**: 1024 bytes (Algorand note field limit)
+
+### Wire Format (v1.1 PSK - `0x02`)
+
+```
+[version: 1][protocol: 2][ratchet_counter: 4][sender_pubkey: 32][ephemeral_pubkey: 32][nonce: 12][encrypted_sender_key: 48][ciphertext: variable]
+```
+
+- **Header size**: 130 bytes (126 + 4-byte ratchet counter)
+- **Max plaintext**: 878 bytes
+- **Hybrid key derivation**: X25519 ECDH + ratcheted pre-shared key
 
 ### Transport
 
