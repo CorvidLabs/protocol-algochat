@@ -319,7 +319,7 @@ ratchet_counter += 1
 ratchet_counter = envelope.ratchet_counter
 
 // Validate counter is within acceptable window
-if ratchet_counter < peer_last_counter - COUNTER_WINDOW:
+if peer_last_counter > COUNTER_WINDOW and ratchet_counter < peer_last_counter - COUNTER_WINDOW:
     reject("Counter too old")
 if ratchet_counter > peer_last_counter + COUNTER_WINDOW:
     reject("Counter too far ahead")
