@@ -318,6 +318,10 @@ ratchet_counter += 1
 // Extract ratchet_counter from envelope
 ratchet_counter = envelope.ratchet_counter
 
+// Reject replays (see section 8.5 for full counter validation rules)
+if has_seen_counter(sender, ratchet_counter):
+    reject("Replay detected")
+
 // Validate counter is within acceptable window
 if peer_last_counter > COUNTER_WINDOW and ratchet_counter < peer_last_counter - COUNTER_WINDOW:
     reject("Counter too old")
