@@ -161,6 +161,10 @@
             border-color: #92cc41;
             background-color: #203d25;
         }
+        .byte.psk {
+            border-color: #a78bfa;
+            background-color: #2d2040;
+        }
         .wire-legend {
             display: flex;
             justify-content: center;
@@ -189,6 +193,10 @@
         .legend-color.payload {
             border-color: #92cc41;
             background-color: #203d25;
+        }
+        .legend-color.psk {
+            border-color: #a78bfa;
+            background-color: #2d2040;
         }
         .wire-summary {
             text-align: center;
@@ -241,11 +249,27 @@
                     </div>
                     <p>No central server required</p>
                 </div>
+                <div class="feature-item">
+                    <div class="feature-header">
+                        <i class="nes-icon is-small like"></i>
+                        <strong>Quantum Resistant</strong>
+                    </div>
+                    <p>Optional PSK mode (v1.1)</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-header">
+                        <i class="nes-icon is-small star"></i>
+                        <strong>Ratcheted Keys</strong>
+                    </div>
+                    <p>Session-bounded PSK derivation</p>
+                </div>
             </div>
         </section>
 
         <section class="nes-container with-title is-dark section">
-            <p class="title">Wire Format (v1)</p>
+            <p class="title">Wire Format</p>
+
+            <p style="margin-bottom: 12px; color: #92cc41; font-size: 10px;">v1.0 &mdash; Standard Mode (0x01)</p>
             <div class="wire-format">
                 <div class="wire-bytes">
                     <span class="byte header">ver:1</span>
@@ -256,22 +280,44 @@
                     <span class="byte crypto">enc_sender:48</span>
                     <span class="byte payload">ciphertext:var</span>
                 </div>
-                <div class="wire-legend">
-                    <div class="legend-item">
-                        <span class="legend-color header"></span>
-                        <span>Header</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color crypto"></span>
-                        <span>Crypto</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color payload"></span>
-                        <span>Payload</span>
-                    </div>
+                <div class="wire-summary">
+                    <strong>Header:</strong> 126 bytes &nbsp;|&nbsp; <strong>Max plaintext:</strong> 882 bytes &nbsp;|&nbsp; <strong>Note limit:</strong> 1024 bytes
+                </div>
+            </div>
+
+            <p style="margin-bottom: 12px; margin-top: 24px; color: #f7d51d; font-size: 10px;">v1.1 &mdash; PSK Mode (0x02)</p>
+            <div class="wire-format">
+                <div class="wire-bytes">
+                    <span class="byte header">ver:1</span>
+                    <span class="byte header">proto:2</span>
+                    <span class="byte psk">counter:4</span>
+                    <span class="byte crypto">sender_pk:32</span>
+                    <span class="byte crypto">ephemeral_pk:32</span>
+                    <span class="byte crypto">nonce:12</span>
+                    <span class="byte crypto">enc_sender:48</span>
+                    <span class="byte payload">ciphertext:var</span>
                 </div>
                 <div class="wire-summary">
-                    <strong>Fixed header:</strong> 126 bytes &nbsp;|&nbsp; <strong>Max payload:</strong> 898 bytes &nbsp;|&nbsp; <strong>Note limit:</strong> 1024 bytes
+                    <strong>Header:</strong> 130 bytes &nbsp;|&nbsp; <strong>Max plaintext:</strong> 878 bytes &nbsp;|&nbsp; <strong>Hybrid:</strong> X25519 + ratcheted PSK
+                </div>
+            </div>
+
+            <div class="wire-legend">
+                <div class="legend-item">
+                    <span class="legend-color header"></span>
+                    <span>Header</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color psk"></span>
+                    <span>PSK</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color crypto"></span>
+                    <span>Crypto</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color payload"></span>
+                    <span>Payload</span>
                 </div>
             </div>
         </section>
@@ -291,6 +337,47 @@
         </section>
 
         <section class="nes-container with-title is-dark section">
+            <p class="title">PSK Ratchet (v1.1)</p>
+            <p>Optional pre-shared key mode adds quantum resistance through hybrid key derivation.</p>
+            <table class="nes-table is-bordered is-dark impl-table" style="margin-top: 15px;">
+                <thead>
+                    <tr><th>Property</th><th>Standard (0x01)</th><th>PSK (0x02)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Key derivation</td>
+                        <td>X25519 ECDH</td>
+                        <td>X25519 + ratcheted PSK</td>
+                    </tr>
+                    <tr>
+                        <td>Quantum resistance</td>
+                        <td><span class="nes-text is-error">No</span></td>
+                        <td><span class="nes-text is-success">Defense-in-depth</span></td>
+                    </tr>
+                    <tr>
+                        <td>Max plaintext</td>
+                        <td>882 bytes</td>
+                        <td>878 bytes</td>
+                    </tr>
+                    <tr>
+                        <td>Session size</td>
+                        <td>N/A</td>
+                        <td>100 messages</td>
+                    </tr>
+                    <tr>
+                        <td>Out-of-order delivery</td>
+                        <td><span class="nes-text is-success">Yes</span></td>
+                        <td><span class="nes-text is-success">Yes (counter window)</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="margin-top: 16px; font-size: 10px; color: #adb5bd;">
+                The ratchet derives a unique key per message from a shared PSK using deterministic session-based HKDF.
+                An attacker must break <strong style="color: #e76e55;">both</strong> X25519 and know the PSK to decrypt.
+            </p>
+        </section>
+
+        <section class="nes-container with-title is-dark section">
             <p class="title">Documentation</p>
             <div class="doc-links">
                 <a href="https://github.com/CorvidLabs/protocol-algochat/blob/main/PROTOCOL.md" class="nes-btn is-primary doc-link">
@@ -301,6 +388,9 @@
                 </a>
                 <a href="https://github.com/CorvidLabs/protocol-algochat/blob/main/SECURITY.md" class="nes-btn is-warning doc-link">
                     SECURITY.md
+                </a>
+                <a href="https://github.com/CorvidLabs/protocol-algochat/blob/main/TEST-VECTORS.md" class="nes-btn doc-link">
+                    TEST-VECTORS.md
                 </a>
             </div>
         </section>
@@ -357,6 +447,25 @@
                 <li>Sender pays tx fee (~0.001 ALGO)</li>
                 <li>Note field limit: 1024 bytes</li>
             </ul>
+        </section>
+
+        <section class="nes-container with-title is-dark section">
+            <p class="title">Version History</p>
+            <table class="nes-table is-bordered is-dark impl-table">
+                <thead>
+                    <tr><th>Version</th><th>Changes</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="nes-text is-success">1.0</span></td>
+                        <td>Initial specification. Standard mode (0x01) with X25519 + ChaCha20-Poly1305.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="nes-text is-warning">1.1</span></td>
+                        <td>Add ratcheting PSK mode (0x02). Hybrid X25519 + pre-shared key derivation for quantum defense-in-depth.</td>
+                    </tr>
+                </tbody>
+            </table>
         </section>
 
         <div class="links-section">
