@@ -7,7 +7,8 @@
       "repo": "CorvidLabs/swift-algochat",
       "status": "production",
       "description": "iOS, macOS, Linux",
-      "testCommand": "swift test"
+      "testCommand": "swift test",
+      "protocols": ["0x01", "0x02"]
     },
     {
       "id": "ts-algochat",
@@ -16,7 +17,8 @@
       "repo": "CorvidLabs/ts-algochat",
       "status": "active-dev",
       "description": "Node.js, Browsers",
-      "testCommand": "bun test"
+      "testCommand": "bun test",
+      "protocols": ["0x01", "0x02"]
     },
     {
       "id": "py-algochat",
@@ -25,7 +27,8 @@
       "repo": "CorvidLabs/py-algochat",
       "status": "active-dev",
       "description": "Python 3.10+",
-      "testCommand": "pytest"
+      "testCommand": "pytest",
+      "protocols": ["0x01", "0x02"]
     },
     {
       "id": "rs-algochat",
@@ -34,7 +37,8 @@
       "repo": "CorvidLabs/rs-algochat",
       "status": "active-dev",
       "description": "Cargo crate",
-      "testCommand": "cargo test"
+      "testCommand": "cargo test",
+      "protocols": ["0x01", "0x02"]
     },
     {
       "id": "kt-algochat",
@@ -43,7 +47,8 @@
       "repo": "CorvidLabs/kt-algochat",
       "status": "active-dev",
       "description": "JVM, Android",
-      "testCommand": "gradle test"
+      "testCommand": "gradle test",
+      "protocols": ["0x01", "0x02"]
     },
     {
       "id": "algochat-web",
@@ -52,7 +57,8 @@
       "repo": "CorvidLabs/algochat-web",
       "status": "active-dev",
       "description": "Web app with NES.css",
-      "testCommand": "bun test"
+      "testCommand": "bun test",
+      "protocols": ["0x01", "0x02"]
     }
   ]
 }
