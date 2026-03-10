@@ -6,6 +6,8 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 permissions:
   contents: read
@@ -371,7 +373,7 @@ jobs:
 
   deploy:
     needs: generate-status
-    if: always() && needs.generate-status.result == 'success'
+    if: always() && needs.generate-status.result == 'success' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
