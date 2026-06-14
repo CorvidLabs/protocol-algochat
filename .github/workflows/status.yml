@@ -6,8 +6,16 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    paths:
+      - implementations.json
+      - scripts/**
+      - .github/workflows/status.yml
   pull_request:
     branches: [main]
+    paths:
+      - implementations.json
+      - scripts/**
+      - .github/workflows/status.yml
 
 permissions:
   contents: read
@@ -15,15 +23,16 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: status-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test-swift:
     runs-on: macos-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout swift-algochat
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: CorvidLabs/swift-algochat
 
@@ -72,9 +81,10 @@ jobs:
 
   test-typescript:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout ts-algochat
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: CorvidLabs/ts-algochat
 
@@ -124,9 +134,10 @@ jobs:
 
   test-python:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout py-algochat
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: CorvidLabs/py-algochat
 
@@ -178,9 +189,10 @@ jobs:
 
   test-rust:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout rs-algochat
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: CorvidLabs/rs-algochat
 
@@ -225,9 +237,10 @@ jobs:
 
   test-kotlin:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout kt-algochat
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: CorvidLabs/kt-algochat
 
@@ -275,9 +288,10 @@ jobs:
 
   test-web:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout algochat-web
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: CorvidLabs/algochat-web
 
@@ -335,9 +349,10 @@ jobs:
     needs: [test-swift, test-typescript, test-python, test-rust, test-kotlin, test-web]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout protocol repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -375,12 +390,13 @@ jobs:
     needs: generate-status
     if: always() && needs.generate-status.result == 'success' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Download status page
         uses: actions/download-artifact@v4
