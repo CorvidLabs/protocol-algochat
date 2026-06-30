@@ -89,7 +89,15 @@ See [SECURITY.md](SECURITY.md) for the full threat model.
 | Python | [py-algochat](https://github.com/CorvidLabs/py-algochat) | Active |
 | Rust | [rs-algochat](https://github.com/CorvidLabs/rs-algochat) | Active |
 | Kotlin | [kt-algochat](https://github.com/CorvidLabs/kt-algochat) | Active |
-| Angular | [algochat-web](https://github.com/CorvidLabs/algochat-web) | Active |
+| Go | [go-algochat](https://github.com/CorvidLabs/go-algochat) | Active, conformance pending |
+
+The conformance harness ([test-algochat](https://github.com/CorvidLabs/test-algochat)) currently covers Swift, TypeScript, Python, Rust, and Kotlin. Go is implemented and being brought into the harness.
+
+## Clients
+
+| Client | Repository | Status |
+|--------|------------|--------|
+| Angular (web) | [algochat-web](https://github.com/CorvidLabs/algochat-web) | Archived (superseded by Raven) |
 
 See the [Implementation Status Dashboard](https://corvidlabs.github.io/protocol-algochat/status.html) for live test results.
 
