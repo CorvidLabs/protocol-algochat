@@ -1,0 +1,6 @@
+[tasks]
+validate = "bun scripts/validate.ts"
+
+[lanes.verify]
+description = "Validate protocol documents and implementation registry"
+steps = ["validate"]

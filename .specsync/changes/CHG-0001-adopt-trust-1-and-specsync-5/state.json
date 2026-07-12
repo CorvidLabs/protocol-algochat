@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "id": "CHG-0001-adopt-trust-1-and-specsync-5",
+  "slug": "adopt-trust-1-and-specsync-5",
+  "title": "Adopt Trust 1 and SpecSync 5",
+  "description": "Adopt Trust 1 and SpecSync 5",
+  "kind": "migration",
+  "state": "implementing",
+  "base_commit": "690922056a37bd995d304a004de0b0031244bce7",
+  "created_at": 1783827580,
+  "updated_at": 1783832541,
+  "affected_specs": [],
+  "affected_paths": [
+    ".github/workflows/",
+    ".specsync/",
+    ".trust.toml",
+    ".augur.toml",
+    ".attest.json",
+    "AGENTS.md",
+    ".claude/",
+    ".cursor/",
+    ".codex/",
+    ".gemini/",
+    "fledge.toml",
+    "scripts/"
+  ],
+  "no_spec_change": true,
+  "no_spec_change_rationale": "Tooling-only governance migration; stable requirement IDs, where present, do not change existing semantics.",
+  "acceptance_criteria": [
+    "Trust 1 runs deterministic protocol validation; SpecSync 5.0.1 strict validation passes; all four agent integrations are installed; scheduled implementation status remains independent"
+  ],
+  "selected_artifacts": [
+    "context",
+    "research",
+    "design",
+    "plan",
+    "tasks",
+    "testing",
+    "docs"
+  ],
+  "dependencies": [],
+  "answers": {
+    "architecture_risk": "yes",
+    "public_contract": "no"
+  }
+}
