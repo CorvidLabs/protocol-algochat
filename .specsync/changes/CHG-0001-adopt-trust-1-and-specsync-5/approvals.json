@@ -6,6 +6,20 @@
       "timestamp": 1783832541,
       "digest": "21f020447f67332b7ebdb3f679984141a9fe1c05782a9c548a1cc781fa6d1335",
       "note": "Authorized by the approved organization-wide SpecSync 5 / Trust 1 migration plan."
+    },
+    {
+      "gate": "definition",
+      "actor": "0xLeif",
+      "timestamp": 1783905122,
+      "digest": "cc4fb2a472350e2642ae5913e35f9b2c3ed8dd983dc37e204fe89a483a9f7f90",
+      "note": "Reviewed protocol governance adoption after deterministic validation, six hosted implementation matrices, Trust/CodeQL success, all agents, and required trust protection."
+    },
+    {
+      "gate": "acceptance",
+      "actor": "0xLeif",
+      "timestamp": 1783905130,
+      "digest": "ef2494613163c0e2f6587c91628e5f7d7783f520328e24c49154da9eaac38a1f",
+      "note": "Approved after deterministic validation of five protocol documents and six implementations plus hosted Trust and CodeQL evidence."
     }
   ]
 }
