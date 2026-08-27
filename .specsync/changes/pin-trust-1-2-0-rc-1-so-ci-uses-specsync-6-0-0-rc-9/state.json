@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "workflow_origin_version": 1,
+  "id": "pin-trust-1-2-0-rc-1-so-ci-uses-specsync-6-0-0-rc-9",
+  "slug": "pin-trust-1-2-0-rc-1-so-ci-uses-specsync-6-0-0-rc-9",
+  "title": "Pin Trust 1.2.0-rc.1 so CI uses SpecSync 6.0.0-rc.9",
+  "description": "Pin Trust 1.2.0-rc.1 so CI uses SpecSync 6.0.0-rc.9",
+  "kind": "operations",
+  "state": "verifying",
+  "canonical_applied": true,
+  "base_commit": "9843a2d3a3b85335169718ff749a2de0df117a90",
+  "created_at": 1787874763,
+  "updated_at": 1787874891,
+  "affected_specs": [],
+  "affected_paths": [
+    ".github/workflows/trust.yml"
+  ],
+  "no_spec_change": true,
+  "no_spec_change_rationale": "CI pin only. Trust 1.2.0-rc.1 defaults SpecSync to 6.0.0-rc.9; no canonical spec text changes.",
+  "acceptance_criteria": [
+    "Trust workflow pins CorvidLabs/trust@e964e042f7f2756333d4c46e685a4a6dc09077de (v1.2.0-rc.1). fledge lanes run verify still passes."
+  ],
+  "selected_artifacts": [
+    "context",
+    "plan",
+    "testing"
+  ],
+  "dependencies": [],
+  "answers": {
+    "architecture_risk": "no",
+    "public_contract": "no"
+  }
+}
