@@ -6,10 +6,11 @@
   "title": "Document Falcon-1024 Algorand account identity as protocol 1.2 without changing 0x01/0x02 envelopes",
   "description": "Document Falcon-1024 Algorand account identity as protocol 1.2 without changing 0x01/0x02 envelopes",
   "kind": "documentation",
-  "state": "draft",
+  "state": "verifying",
+  "canonical_applied": true,
   "base_commit": "b917a3263deca3e7d15f341b96511b9a0029806b",
   "created_at": 1787870676,
-  "updated_at": 1787872462,
+  "updated_at": 1787873513,
   "affected_specs": [],
   "affected_paths": [
     "PROTOCOL.md",
