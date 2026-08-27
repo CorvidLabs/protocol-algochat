@@ -1,5 +1,5 @@
 ---
-change: document-falcon-1024-algorand-account-identity-as-protocol-1-2-without-changing-0x01-0x02-envelopes
+change: CHG-0002-falcon-account-identity
 artifact: context
 ---
 
@@ -22,6 +22,11 @@ This change is documentation-only. Envelope bytes for `0x01` and `0x02` do
 not change. Existing test vectors remain canonical. Key-exchange quantum
 resistance is still PSK (`0x02`) or a future hybrid KEM; Falcon does not
 replace that.
+
+SpecSync 5.0.1 (Trust CI) forbids `no_spec_change` together with interview
+`public_contract=yes`. This repo has no `specs/<module>` canonical spec, so
+the change keeps `no_spec_change` and records `public_contract=no`. The
+normative public contract remains PROTOCOL.md.
 
 ## Constraints
 

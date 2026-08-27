@@ -1,5 +1,5 @@
 ---
-id: document-falcon-1024-algorand-account-identity-as-protocol-1-2-without-changing-0x01-0x02-envelopes
+id: CHG-0002-falcon-account-identity
 state: draft
 type: documentation
 base_commit: b917a3263deca3e7d15f341b96511b9a0029806b
@@ -13,7 +13,7 @@ Document Falcon-1024 Algorand account identity as protocol 1.2 without changing 
 
 ## Affected Canonical Specs
 
-- `none`
+- None
 
 ## Acceptance Criteria
 
@@ -21,6 +21,4 @@ Document Falcon-1024 Algorand account identity as protocol 1.2 without changing 
 
 ## No-spec Rationale
 
-This repository's normative contract is PROTOCOL.md (plus IMPLEMENTATION.md,
-SECURITY.md, and TEST-VECTORS.md). There is no `specs/<module>` canonical
-spec for the wire protocol. v1.2 is documented in those files.
+This repository's normative contract is PROTOCOL.md (plus IMPLEMENTATION.md, SECURITY.md, and TEST-VECTORS.md). There is no specs/<module> canonical spec for the wire protocol.

@@ -1,27 +1,26 @@
 {
   "schema_version": 1,
   "workflow_origin_version": 1,
-  "id": "document-falcon-1024-algorand-account-identity-as-protocol-1-2-without-changing-0x01-0x02-envelopes",
-  "slug": "document-falcon-1024-algorand-account-identity-as-protocol-1-2-without-changing-0x01-0x02-envelopes",
+  "id": "CHG-0002-falcon-account-identity",
+  "slug": "falcon-account-identity",
   "title": "Document Falcon-1024 Algorand account identity as protocol 1.2 without changing 0x01/0x02 envelopes",
   "description": "Document Falcon-1024 Algorand account identity as protocol 1.2 without changing 0x01/0x02 envelopes",
   "kind": "documentation",
   "state": "draft",
   "base_commit": "b917a3263deca3e7d15f341b96511b9a0029806b",
   "created_at": 1787870676,
-  "updated_at": 1787870687,
-  "affected_specs": [
-    "none"
-  ],
+  "updated_at": 1787872462,
+  "affected_specs": [],
   "affected_paths": [
     "PROTOCOL.md",
     "IMPLEMENTATION.md",
     "SECURITY.md",
     "TEST-VECTORS.md",
-    "README.md"
+    "README.md",
+    "index.html"
   ],
-  "no_spec_change": false,
-  "no_spec_change_rationale": null,
+  "no_spec_change": true,
+  "no_spec_change_rationale": "This repository's normative contract is PROTOCOL.md (plus IMPLEMENTATION.md, SECURITY.md, and TEST-VECTORS.md). There is no specs/<module> canonical spec for the wire protocol.",
   "acceptance_criteria": [
     "PROTOCOL.md, IMPLEMENTATION.md, SECURITY.md, TEST-VECTORS.md, and README.md describe Falcon-1024 as an Algorand authorizing signature for AlgoChat payments; encryption seed is 32-byte mnemonic entropy; 0x01/0x02 envelopes and existing test vectors are unchanged; Ed25519 import stays valid; Falcon minimum fee is 3x minFee; key discovery authorship is the payment signature; bun scripts/validate.ts passes."
   ],
@@ -38,6 +37,6 @@
   "dependencies": [],
   "answers": {
     "architecture_risk": "yes",
-    "public_contract": "yes"
+    "public_contract": "no"
   }
 }

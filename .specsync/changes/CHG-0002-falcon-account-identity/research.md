@@ -1,5 +1,5 @@
 ---
-change: document-falcon-1024-algorand-account-identity-as-protocol-1-2-without-changing-0x01-0x02-envelopes
+change: CHG-0002-falcon-account-identity
 artifact: research
 ---
 
