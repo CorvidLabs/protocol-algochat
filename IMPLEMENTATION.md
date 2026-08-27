@@ -9,19 +9,26 @@ Your implementation needs:
 1. **X25519** - Elliptic curve Diffie-Hellman
 2. **ChaCha20-Poly1305** - Authenticated encryption
 3. **HKDF-SHA256** - Key derivation
-4. **Algorand SDK** - Transaction creation and submission
+4. **Algorand SDK** - Transaction creation and submission. Sending from a
+   Falcon-1024 account requires an SDK that can attach a `pqsig` (for example
+   js-algorand-sdk ≥ 3.7.0). Envelope encode/decode does not.
+
+The 32-byte value passed to `deriveEncryptionKeys` is **mnemonic entropy**,
+not "whatever signing key the wallet currently holds." For Ed25519 accounts
+that entropy is `sk[0:32]`. For Falcon-1024 accounts it is still the 32-byte
+seed decoded from the 25-word mnemonic. Never slice a Falcon secret key.
 
 ## Core Functions
 
 ### Key Derivation
 
 ```pseudocode
-function deriveEncryptionKeys(algorandSeed: bytes[32]) -> KeyPair:
+function deriveEncryptionKeys(mnemonicEntropy: bytes[32]) -> KeyPair:
     salt = encode("AlgoChat-v1-encryption")
     info = encode("x25519-key")
 
     encryptionSeed = HKDF_SHA256(
-        ikm: algorandSeed,
+        ikm: mnemonicEntropy,
         salt: salt,
         info: info,
         length: 32

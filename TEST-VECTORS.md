@@ -1,9 +1,14 @@
 # AlgoChat Test Vectors
 
-**Version**: 1.1
+**Version**: 1.2
 **Purpose**: Cross-implementation verification
 
 These test vectors enable implementations to verify correctness by using deterministic inputs and checking outputs match exactly.
+
+Protocol 1.2 does not add envelope vectors. Falcon-1024 is an Algorand
+authorizing signature, not an envelope mode. The 32-byte `seed` values below
+are **mnemonic entropy** (identical to Ed25519 `sk[0:32]`). They are not a
+prefix of a Falcon secret key.
 
 ## 1. Key Derivation
 

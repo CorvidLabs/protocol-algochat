@@ -1,6 +1,6 @@
 # AlgoChat Protocol Specification
 
-**Version**: 1.1
+**Version**: 1.2
 **Status**: Stable
 
 ## 1. Overview
@@ -16,6 +16,7 @@ AlgoChat is an end-to-end encrypted messaging protocol that uses the Algorand bl
 5. **Decentralization** - No trusted third parties required
 6. **Simplicity** - Minimal protocol complexity
 7. **Quantum Resistance (Optional)** - Pre-shared key mode provides defense-in-depth against future quantum attacks on key exchange
+8. **Account agility** - Payments MAY be authorized by Ed25519 or by native Falcon-1024 (`pqsig`). Envelope bytes do not depend on the authorizing scheme. Falcon identity does not make X25519 key exchange quantum-safe.
 
 ## 3. Cryptographic Primitives
 
@@ -31,17 +32,29 @@ See [TEST-VECTORS.md](./TEST-VECTORS.md#1-key-derivation) for canonical test vec
 
 ### 4.1 Encryption Key Pair
 
-Each participant derives an X25519 key pair from their Algorand account seed:
+Each participant derives an X25519 key pair from the **32-byte entropy** of
+their 25-word Algorand mnemonic. That entropy is the IKM. It is independent
+of whether payments are later authorized by Ed25519 or Falcon-1024.
 
 ```
-seed = algorand_account_private_key[0:32]  // First 32 bytes
-salt = "AlgoChat-v1-encryption"
-info = "x25519-key"
+entropy = 32-byte master seed from the 25-word Algorand mnemonic
+salt    = "AlgoChat-v1-encryption"
+info    = "x25519-key"
 
-encryption_seed = HKDF-SHA256(seed, salt, info, 32)
+encryption_seed = HKDF-SHA256(entropy, salt, info, 32)
 private_key = encryption_seed
-public_key = X25519_PUBLIC(private_key)
+public_key  = X25519_PUBLIC(private_key)
 ```
+
+For an Ed25519 Algorand account, `entropy` is identical to
+`algorand_account_private_key[0:32]`. Implementations MUST NOT take the first
+32 bytes of a Falcon-1024 secret key as `entropy`. Falcon secret keys are
+much larger and are derived from the mnemonic through a domain-separated
+hash (`SHA512-256("PQK" || scheme || entropy)`). Using that material as the
+AlgoChat IKM would silently fork every encryption key.
+
+The test vectors in [TEST-VECTORS.md](./TEST-VECTORS.md#1-key-derivation)
+feed 32-byte seeds. Those seeds are mnemonic entropy. They are unchanged.
 
 ### 4.2 Ephemeral Key Pair
 
@@ -51,6 +64,26 @@ Each message uses a fresh ephemeral key pair:
 ephemeral_private = RANDOM(32)
 ephemeral_public = X25519_PUBLIC(ephemeral_private)
 ```
+
+### 4.3 Algorand account identity
+
+The envelope does not encode the Algorand signature scheme. The payment that
+carries the note does.
+
+| Scheme | Transaction field | Address | Create | Import without a scheme |
+| --- | --- | --- | --- | --- |
+| Ed25519 | `sig` | Encodes the 32-byte Ed25519 public key | Allowed | **Required default.** Recovers the classical address (Pera / AlgoChat v1.1). |
+| Falcon-1024 | `pqsig` (`sch = "f1"`) | `SHA512-256("PQA" \|\| "f1" \|\| salt \|\| pk)` encoded as the usual 58-character address | Allowed; implementations MAY default new accounts here | **MUST be explicit.** The same 25 words yield a different address. |
+
+The 25-word mnemonic is a cross-scheme master secret. One mnemonic can derive
+both an Ed25519 account and a Falcon-1024 account. They do not share an
+address. They DO share AlgoChat encryption keys, because those keys come
+from the mnemonic entropy (section 4.1).
+
+An existing Ed25519 account MAY rekey its auth address to a Falcon-1024
+address. The public address stays the same. After rekey, every payment from
+that address MUST carry a Falcon `pqsig` and MUST pay the Falcon fee
+(section 10.3).
 
 ## 5. Envelope Format
 
@@ -456,6 +489,28 @@ To message someone, you need their X25519 public key. Discovery methods:
 2. **Key Publish Transaction** - Look for key-publish messages sent to self
 3. **Out-of-Band** - Exchange keys through another channel
 
+The binding between Algorand identity and that X25519 key is the
+**authorizing signature of the payment** (`sig` or `pqsig`). A peer who can
+spend from the sender address published the envelope. Implementations MAY
+also attach an Ed25519 signature over the X25519 public key (the v1.1
+announce format). That extra signature is optional, applies only when the
+sender address is an Ed25519 public key, and MUST NOT be required for
+Falcon-1024 senders.
+
+### 10.3 Fees
+
+AlgoChat does not set the network fee. It inherits Algorand's minimum.
+
+| Authorizing scheme | Minimum fee at 1,000 µAlgo base | Notes |
+| --- | --- | --- |
+| Ed25519 | 1,000 µAlgo (0.001 ALGO) | Historical AlgoChat default |
+| Falcon-1024 | 3,000 µAlgo (0.003 ALGO) | Base + 2× Falcon contribution |
+
+Implementations MUST set a Falcon payment's fee to at least three times
+`min-fee` (or the value reported by simulate with a placeholder `pqsig`).
+Underpaying is rejected by consensus. The payment `amount` field (often 0 or
+1,000 µAlgo) is independent of this fee.
+
 **Filtering for AlgoChat transactions:**
 
 When querying the indexer, filter by note prefix to match the protocol mode:
@@ -519,6 +574,7 @@ COUNTER_WINDOW         = 200
 
 // Shared
 MAX_NOTE_SIZE          = 1024
+FALCON_FEE_MULTIPLIER  = 3   // Falcon-1024 min fee = minFee * 3
 
 // Key derivation constants
 KEY_DERIVATION_SALT        = "AlgoChat-v1-encryption"
@@ -543,3 +599,4 @@ See [TEST-VECTORS.md](./TEST-VECTORS.md) for canonical test vectors that enable 
 |---------|---------|
 | 1.0 | Initial specification |
 | 1.1 | Add ratcheting PSK mode (protocol `0x02`). |
+| 1.2 | Account agility: payments MAY be Falcon-1024 `pqsig` as well as Ed25519 `sig`. Encryption seed is mnemonic entropy, not a signing-key prefix. Falcon min fee is 3×. Envelope bytes and 1.1 test vectors are unchanged. |

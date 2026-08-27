@@ -1,0 +1,81 @@
+{
+  "timestamp": 1787873907,
+  "commit": "1405b056d3f11f0cfc2cd78e1b6730da83d196c2",
+  "contract_digest": "494fa9dd6ecb9c98cdf9ffc584684653e0ac9af7d6b42372e0f813b2c8b77e40",
+  "workspace_digest": "e666bc5637ed06c59a0b89cd3c7462c59221b1cd174246eed5233fff3ac915a8",
+  "acceptance_input_digest": "5fa5c4700ccaf6068fc5d711c7a67ac2a13a79b302202d5746fa67b77735d64b",
+  "acceptance_manifest": {
+    "schema_version": 1,
+    "entries": [
+      {
+        "path": "IMPLEMENTATION.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a458adbbf1af7c5369e8eb26bb78288cc6c76d2bc37d81e1744419d83943c7db",
+        "entry_digest": "68731f2fa041839e2c1b4d1427a60a08e97d3594b32ee48c88975f94f9049c87",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "PROTOCOL.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "a16252a004681de0dec96488dba8ec4ebd7fdb12fddcb236e414959f63628771",
+        "entry_digest": "53d104e09f38c7df5d3bcc1a479d1f5100fe4f4fb3303b94ebd4b244199a4fc4",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "README.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "67cdaa3ea04dbc86921db3decfa4e27e93e89ad7325dad62eeff52360d572b05",
+        "entry_digest": "585d36956f89883da6acbe120b1b66ddcf5081f3c06330578d7b9b84e02d416f",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "SECURITY.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "6228d19864109064c2cd52af6a3304ae675a12c2db69ec59895cd6c1debebd9e",
+        "entry_digest": "694543ce306aea2eb181c7e41e10fe7d5fa471a98932d53a3cdf9b0b3622b05d",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "TEST-VECTORS.md",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "80ff3d61a37639bb7faaf8aa15d5c6dc60cb718c1a71170ed8155905a86aaa83",
+        "entry_digest": "244c2bb234a897a643a53b5ad0e426361cafa646979bf52a263f3c5be6123fbf",
+        "owners": [
+          "@exact:delivery"
+        ]
+      },
+      {
+        "path": "index.html",
+        "kind": "file",
+        "mode": 33188,
+        "payload_digest": "3303e4bd5ce6d8a4fcd646e9bfcbc1a391172b08a019885d16e2de056f52b095",
+        "entry_digest": "f1fec1c7425d84d0734d2452aa11740f20f5bd078211b2ff439ae2aea62667d3",
+        "owners": [
+          "@exact:delivery"
+        ]
+      }
+    ]
+  },
+  "passed": true,
+  "commands": [
+    {
+      "command": "bun scripts/validate.ts",
+      "success": true,
+      "exit_code": 0
+    }
+  ],
+  "requirement_ids": []
+}

@@ -16,7 +16,8 @@
 3. **Key Compromise** - Future messages to a compromised key are readable (without PSK)
 4. **Traffic Analysis** - Transaction patterns may reveal communication patterns
 5. **Algorand Network Attacks** - Protocol relies on blockchain security
-6. **Quantum Attacks on Key Exchange** - X25519 is vulnerable to quantum computers. **With PSK mode (`0x02`)**, an attacker must also compromise the pre-shared key, providing defense-in-depth. See [PSK Security Properties](#psk-security-properties) below.
+6. **Quantum Attacks on Key Exchange** - X25519 is vulnerable to quantum computers. **With PSK mode (`0x02`)**, an attacker must also compromise the pre-shared key, providing defense-in-depth. See [PSK Security Properties](#psk-security-properties) below. A Falcon-1024 **account** does not close this gap: it protects who can authorize the payment, not the X25519 handshake inside the note.
+7. **Quantum Attacks on Ed25519 Identity** - A sufficiently large quantum computer can recover an Ed25519 private key from the public key encoded in a classical Algorand address. Native Falcon-1024 accounts (`pqsig`) resist that attack. They are optional in v1.2. Importing a 25-word phrase without an explicit Falcon scheme MUST keep the Ed25519 address so existing wallets do not silently move.
 
 ## Cryptographic Guarantees
 
@@ -42,9 +43,11 @@
 
 ### Key Derivation
 
-- Encryption keys derived from Algorand account seed
-- Deterministic derivation enables key recovery from mnemonic
+- Encryption keys derived from the 32-byte entropy of the 25-word Algorand mnemonic
+- That entropy is `sk[0:32]` for Ed25519 accounts and MUST NOT be taken from a Falcon-1024 secret key
+- Deterministic derivation enables key recovery from the mnemonic regardless of whether payments are Ed25519- or Falcon-signed
 - HKDF with domain-specific salt prevents key reuse across protocols
+- The same mnemonic yields the same X25519 keys and, if Falcon is requested, a different Algorand address
 
 ### Key Storage
 
@@ -77,6 +80,7 @@ Sensitive data (private keys, symmetric keys, plaintext, PSK material, derived s
 - Public keys discovered from transaction history
 - Key publish transactions enable proactive key distribution
 - Out-of-band key exchange supported
+- Authorship is the payment's authorizing signature (`sig` or `pqsig`). An extra Ed25519 signature over the X25519 key is optional and is not defined for Falcon senders.
 
 ### PSK Key Management
 
