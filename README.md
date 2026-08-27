@@ -1,7 +1,7 @@
 # AlgoChat Protocol
 
 [![License](https://img.shields.io/github/license/CorvidLabs/protocol-algochat)](https://github.com/CorvidLabs/protocol-algochat/blob/main/LICENSE)
-[![Status](https://img.shields.io/badge/protocol-1.1-green)](https://corvidlabs.github.io/protocol-algochat/)
+[![Status](https://img.shields.io/badge/protocol-1.2-green)](https://corvidlabs.github.io/protocol-algochat/)
 
 Encrypted, immutable annotations for Algorand transactions.
 
@@ -28,13 +28,23 @@ Be aware of what this protocol cannot do:
 | **882-byte messages** | Maximum plaintext size (standard mode); 878 bytes in PSK mode. No images, files, or long texts. |
 | **Metadata visible** | Sender/recipient addresses and timing are public on-chain |
 | **No message deletion** | Blockchain is immutable; messages persist forever |
-| **Cost per message** | ~0.001 ALGO transaction fee (see [Economics](#economics)) |
+| **Cost per message** | ~0.001 ALGO (Ed25519) or ~0.003 ALGO (Falcon-1024) at today's min-fee (see [Economics](#economics)) |
 | **4.5s latency** | Algorand block finality time |
 | **No deniability** | Sender attribution is included in the envelope |
 
 ## Economics
 
-Each message costs ~0.001 ALGO in transaction fees. However, Algorand staking rewards can offset or exceed this cost, effectively making messaging free for participants.
+Each message pays the Algorand network minimum for the authorizing signature:
+
+| Authorizing scheme | Fee at 1,000 µAlgo min-fee |
+| --- | --- |
+| Ed25519 (`sig`) | ~0.001 ALGO |
+| Falcon-1024 (`pqsig`) | ~0.003 ALGO |
+
+The 25-word mnemonic is the master secret. New accounts MAY be Falcon-1024.
+Importing a phrase without an explicit scheme MUST recover the Ed25519
+address. Falcon identity does not make the X25519 envelope quantum-safe;
+PSK mode still covers that. Staking rewards can offset fees:
 
 **Staking Options:**
 
@@ -65,6 +75,7 @@ Users with less than 30K ALGO can participate through liquid staking or pools. T
 | Forward secrecy | Protected (ephemeral keys per message) |
 | Replay attacks | Protected (blockchain uniqueness + PSK counter) |
 | Quantum resistance (key exchange) | Optional (PSK mode provides defense-in-depth) |
+| Quantum resistance (account identity) | Optional (native Falcon-1024 `pqsig`; v1.2) |
 | PSK session forward secrecy | Optional (100-message session boundaries in PSK mode) |
 | Metadata privacy | **Not protected** (addresses, timing visible) |
 | Traffic analysis | **Not protected** |
@@ -141,7 +152,7 @@ Messages are the `note` field of standard Algorand payment transactions:
 sender  → recipient
 amount  = 0 ALGO (or any payment amount)
 note    = <encrypted AlgoChat envelope>
-fee     = ~0.001 ALGO
+fee     = ~0.001 ALGO (Ed25519) or ~0.003 ALGO (Falcon-1024)
 ```
 
 ## Legal Notice
