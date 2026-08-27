@@ -1,6 +1,6 @@
 ---
 id: CHG-0002-falcon-account-identity
-state: implementing
+state: accepted
 type: documentation
 base_commit: b917a3263deca3e7d15f341b96511b9a0029806b
 ---

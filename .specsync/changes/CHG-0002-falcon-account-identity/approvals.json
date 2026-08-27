@@ -7,6 +7,13 @@
       "digest": "494fa9dd6ecb9c98cdf9ffc584684653e0ac9af7d6b42372e0f813b2c8b77e40",
       "note": "Proceed with SpecSync 6 RC; Trust 5.0.1 pin may stay red.",
       "approved_delta_digests": {}
+    },
+    {
+      "gate": "acceptance",
+      "actor": "0xLeif",
+      "timestamp": 1787873921,
+      "digest": "b292fa5ecb7e520bdca27873882ba002b79f9166b23af6ebc57963be29965e03",
+      "note": "Closing approval for SpecSync 6 RC Falcon 1.2 docs."
     }
   ],
   "reopenings": []
