@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "attempts": [
+    {
+      "timestamp": 1787874888,
+      "commit": "9843a2d3a3b85335169718ff749a2de0df117a90",
+      "contract_digest": "a4cc093ebca0240d262869fad796fdae7132a7b1b17f851efa41342a0d5a3db9",
+      "workspace_digest": "9af021279111b9b26e7a39e47710c03acad530c9c8a5d4db1d162f8191e8897a",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1787874901,
+      "commit": "71d46db28428c232a0febd5c8706e09bad5152cc",
+      "contract_digest": "a4cc093ebca0240d262869fad796fdae7132a7b1b17f851efa41342a0d5a3db9",
+      "workspace_digest": "9af021279111b9b26e7a39e47710c03acad530c9c8a5d4db1d162f8191e8897a",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1787875245,
+      "commit": "01e4c97010e042440e28aef4f945aad94b199620",
+      "contract_digest": "a4cc093ebca0240d262869fad796fdae7132a7b1b17f851efa41342a0d5a3db9",
+      "workspace_digest": "9af021279111b9b26e7a39e47710c03acad530c9c8a5d4db1d162f8191e8897a",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1787875245,
+      "commit": "01e4c97010e042440e28aef4f945aad94b199620",
+      "contract_digest": "a4cc093ebca0240d262869fad796fdae7132a7b1b17f851efa41342a0d5a3db9",
+      "workspace_digest": "9af021279111b9b26e7a39e47710c03acad530c9c8a5d4db1d162f8191e8897a",
+      "acceptance_input_digest": "19df70b6057458c71532d7ba55bfcce204cd2e10371e39d81d4d0662822d0b06",
+      "acceptance_manifest": {
+        "schema_version": 1,
+        "entries": [
+          {
+            "path": ".github/workflows/trust.yml",
+            "kind": "file",
+            "mode": 33188,
+            "payload_digest": "c2c785e0acbf6a6d2d69733958211e94588e5f06f3c6851d6a4e34a3f406146e",
+            "entry_digest": "be2f59cf85dd7b0a4d8c45d46af712423bbbf4c31c16500819a9c6f9daef7442",
+            "owners": [
+              "@exact:delivery"
+            ]
+          }
+        ]
+      },
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    }
+  ]
+}

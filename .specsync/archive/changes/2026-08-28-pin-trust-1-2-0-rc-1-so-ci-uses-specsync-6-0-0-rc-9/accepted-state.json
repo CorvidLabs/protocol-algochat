@@ -6,11 +6,11 @@
   "title": "Pin Trust 1.2.0-rc.1 so CI uses SpecSync 6.0.0-rc.9",
   "description": "Pin Trust 1.2.0-rc.1 so CI uses SpecSync 6.0.0-rc.9",
   "kind": "operations",
-  "state": "verifying",
+  "state": "accepted",
   "canonical_applied": true,
   "base_commit": "9843a2d3a3b85335169718ff749a2de0df117a90",
   "created_at": 1787874763,
-  "updated_at": 1787874905,
+  "updated_at": 1787875250,
   "affected_specs": [],
   "affected_paths": [
     ".github/workflows/trust.yml"

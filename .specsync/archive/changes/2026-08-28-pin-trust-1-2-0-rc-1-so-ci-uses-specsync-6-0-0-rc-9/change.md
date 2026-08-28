@@ -1,6 +1,6 @@
 ---
 id: pin-trust-1-2-0-rc-1-so-ci-uses-specsync-6-0-0-rc-9
-state: implementing
+state: archived
 type: operations
 base_commit: 9843a2d3a3b85335169718ff749a2de0df117a90
 ---
