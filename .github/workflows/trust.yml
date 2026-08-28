@@ -20,7 +20,7 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
-      - uses: CorvidLabs/trust@9d32b5786d2e9e4d39fc581c0091c721ee3d4226 # v1.0.0
+      - uses: CorvidLabs/trust@e964e042f7f2756333d4c46e685a4a6dc09077de # v1.2.0-rc.1
         id: trust
 
       - name: Render Atlas publication

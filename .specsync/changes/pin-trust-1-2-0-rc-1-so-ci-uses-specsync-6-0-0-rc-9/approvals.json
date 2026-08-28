@@ -1,0 +1,13 @@
+{
+  "approvals": [
+    {
+      "gate": "definition",
+      "actor": "0xLeif",
+      "timestamp": 1787874856,
+      "digest": "a4cc093ebca0240d262869fad796fdae7132a7b1b17f851efa41342a0d5a3db9",
+      "note": "Adopt Trust 1.2.0-rc.1 / SpecSync 6.0.0-rc.9 pin.",
+      "approved_delta_digests": {}
+    }
+  ],
+  "reopenings": []
+}
