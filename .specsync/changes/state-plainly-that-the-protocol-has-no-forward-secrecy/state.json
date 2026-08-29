@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "workflow_origin_version": 1,
+  "id": "state-plainly-that-the-protocol-has-no-forward-secrecy",
+  "slug": "state-plainly-that-the-protocol-has-no-forward-secrecy",
+  "title": "State plainly that the protocol has no forward secrecy",
+  "description": "State plainly that the protocol has no forward secrecy",
+  "kind": "bug_fix",
+  "state": "verifying",
+  "canonical_applied": true,
+  "base_commit": "1d9b77ef9372df8817ff05b2f27dd2118b186d4b",
+  "created_at": 1788026870,
+  "updated_at": 1788027288,
+  "affected_specs": [
+    "protocol"
+  ],
+  "affected_paths": [
+    "PROTOCOL.md",
+    "SECURITY.md"
+  ],
+  "no_spec_change": true,
+  "no_spec_change_rationale": "Documentation-only correction of a false forward-secrecy claim; no wire-format, code, or spec-module changes",
+  "acceptance_criteria": [
+    "PROTOCOL.md, SECURITY.md, README.md, and index.html no longer claim forward secrecy; SECURITY.md and README state the property is not provided and point to PROTOCOL.md 11.1; fledge trust verify passes"
+  ],
+  "selected_artifacts": [
+    "context",
+    "testing",
+    "tasks"
+  ],
+  "dependencies": [],
+  "answers": {
+    "architecture_risk": "no",
+    "public_contract": "no"
+  }
+}

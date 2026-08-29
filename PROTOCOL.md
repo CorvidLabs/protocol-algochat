@@ -233,6 +233,7 @@ The `position_psk` is the PSK used for the message at this counter value.
 - Any counter value can be derived independently (no sequential dependency)
 - The `initial_psk` is never used directly for encryption
 - Compromising a `session_psk` exposes at most 100 messages in that session
+- Compromising a `position_psk` exposes only one message
 
 > **Naming note.** "Ratchet" here denotes a deterministic key *schedule*, not a
 > ratchet in the Signal/Double-Ratchet sense. Because any counter value can be
@@ -240,7 +241,6 @@ The `position_psk` is the PSK used for the message at this counter value.
 > past and future position key. Nothing is advanced-and-destroyed, so this
 > construction does not provide forward secrecy. The wire field name
 > `ratchet_counter` is retained for compatibility.
-- Compromising a `position_psk` exposes only one message
 
 ### 8.2 PSK Key Derivation
 

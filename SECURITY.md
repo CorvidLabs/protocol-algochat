@@ -7,16 +7,16 @@
 1. **Message Content Disclosure** - Only sender and recipient can decrypt messages
 2. **Message Tampering** - Authenticated encryption detects modifications
 3. **Replay Attacks** - Blockchain transaction uniqueness prevents replays
-4. **Past Message Exposure** - Forward secrecy via ephemeral keys
 
 ### What AlgoChat Does NOT Protect Against
 
 1. **Metadata Analysis** - Sender/recipient addresses, timing, and message sizes are visible
 2. **Endpoint Compromise** - Malware on user devices can access decrypted messages
-3. **Key Compromise** - Future messages to a compromised key are readable (without PSK)
-4. **Traffic Analysis** - Transaction patterns may reveal communication patterns
-5. **Algorand Network Attacks** - Protocol relies on blockchain security
-6. **Quantum Attacks on Key Exchange** - X25519 is vulnerable to quantum computers. **With PSK mode (`0x02`)**, an attacker must also compromise the pre-shared key, providing defense-in-depth. See [PSK Security Properties](#psk-security-properties) below.
+3. **Key Compromise** - Past and future messages to a compromised key are readable; exposure is retroactive and permanent (PSK mode additionally requires the PSK)
+4. **Past Message Exposure** - No forward secrecy: compromise of a long-term private key (or the recovery phrase that derives it) retroactively decrypts that account's entire history (see [Forward Secrecy -- Not Provided](#forward-secrecy--not-provided))
+5. **Traffic Analysis** - Transaction patterns may reveal communication patterns
+6. **Algorand Network Attacks** - Protocol relies on blockchain security
+7. **Quantum Attacks on Key Exchange** - X25519 is vulnerable to quantum computers. **With PSK mode (`0x02`)**, an attacker must also compromise the pre-shared key, providing defense-in-depth. See [PSK Security Properties](#psk-security-properties) below.
 
 ## Cryptographic Guarantees
 
@@ -32,11 +32,20 @@
 - 128-bit authentication tag detects tampering
 - Blockchain immutability prevents post-hoc modification
 
-### Forward Secrecy
+### Forward Secrecy -- Not Provided
 
-- Each message uses a fresh ephemeral key pair
-- Compromise of long-term keys does not reveal past messages
-- Ephemeral private keys are never stored
+AlgoChat does not provide forward secrecy. Each message uses a fresh ephemeral key pair, which separates per-message symmetric keys, but:
+
+- The ephemeral key pair belongs to the sender, and its public half is published permanently on-chain in the envelope
+- Recovering a message key requires only a long-term private key and that public value
+- Compromise of either party's long-term key -- or the recovery phrase that derives it -- retroactively decrypts every message that account has ever sent or received
+- No revocation or key rotation can undo this; the ciphertext remains publicly retrievable forever
+
+Ephemeral private keys are never stored, which limits endpoint exposure, but this is not forward secrecy. In PSK mode (`0x02`) an attacker needs the PSK as well -- a meaningful additional barrier, but the PSK is static and every position key is a deterministic function of it.
+
+**Implication for users:** a recovery phrase is equivalent to the complete, permanent message history of that account. It must be protected accordingly.
+
+See [PROTOCOL.md §11.1](PROTOCOL.md#111-forward-secrecy--not-provided) for the full analysis.
 
 ## Key Management
 
@@ -101,9 +110,9 @@ PSK mode (`0x02`) derives symmetric keys from the concatenation of the X25519 sh
 
 This is a defense-in-depth strategy, not a replacement for post-quantum cryptography. When standardized PQ algorithms become available, they should replace X25519 directly.
 
-### Session Forward Secrecy
+### Session Key Separation
 
-The ratchet mechanism provides bounded forward secrecy within sessions:
+The ratchet mechanism bounds exposure within sessions, but provides no forward secrecy:
 
 - Each session (100 messages) derives a unique `session_psk` from the `initial_psk`
 - Each message position derives a unique `position_psk` from the `session_psk`
@@ -111,7 +120,7 @@ The ratchet mechanism provides bounded forward secrecy within sessions:
 - Compromising a `session_psk` exposes at most 100 messages in that session
 - Compromising the `initial_psk` exposes all past and future PSK-derived keys
 
-Note: True forward secrecy (where past messages are safe even after full key compromise) is provided by the ephemeral X25519 keys, not by the PSK ratchet. The PSK ratchet adds **breadth limitation** -- if the initial PSK is compromised at some point, earlier sessions are equally exposed.
+Note: The PSK ratchet adds **breadth limitation** only. Every position key is a deterministic function of the `initial_psk` -- nothing is advanced-and-destroyed -- so this is a key schedule, not a ratchet in the Signal sense, and it does not provide forward secrecy.
 
 ### PSK Threat Matrix
 
@@ -120,7 +129,7 @@ Note: True forward secrecy (where past messages are safe even after full key com
 | Classical key exchange attack | Vulnerable | Protected (requires PSK) |
 | Quantum key exchange attack | Vulnerable | Protected (requires PSK) |
 | Long-term key compromise (future msgs) | Vulnerable | Protected (requires PSK) |
-| Long-term key compromise (past msgs) | Protected (ephemeral keys) | Protected (ephemeral keys) |
+| Long-term key compromise (past msgs) | Vulnerable (retroactive, permanent) | Protected (requires PSK as well) |
 | PSK compromise only | N/A | Protected (X25519 still required) |
 | Both X25519 + PSK compromised | N/A | Vulnerable |
 | Endpoint compromise | Vulnerable | Vulnerable |

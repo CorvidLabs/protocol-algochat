@@ -1,0 +1,13 @@
+{
+  "approvals": [
+    {
+      "gate": "definition",
+      "actor": "0xLeif",
+      "timestamp": 1788027068,
+      "digest": "a8c911add6a034c545d563e8fc30b815ba1cbe58868dd343552f3a91d4e7fd6a",
+      "note": "Docs-only correction of false forward-secrecy claim across PROTOCOL.md, SECURITY.md, README.md, index.html",
+      "approved_delta_digests": {}
+    }
+  ],
+  "reopenings": []
+}

@@ -62,10 +62,10 @@ Users with less than 30K ALGO can participate through liquid staking or pools. T
 |----------|--------|
 | Message content confidentiality | Protected (E2EE) |
 | Message integrity | Protected (authenticated encryption) |
-| Forward secrecy | Protected (ephemeral keys per message) |
+| Forward secrecy | **Not protected** (see [PROTOCOL.md §11.1](PROTOCOL.md#111-forward-secrecy--not-provided)) |
 | Replay attacks | Protected (blockchain uniqueness + PSK counter) |
 | Quantum resistance (key exchange) | Optional (PSK mode provides defense-in-depth) |
-| PSK session forward secrecy | Optional (100-message session boundaries in PSK mode) |
+| PSK session key separation | Optional (100-message blast-radius limit in PSK mode; not forward secrecy) |
 | Metadata privacy | **Not protected** (addresses, timing visible) |
 | Traffic analysis | **Not protected** |
 
