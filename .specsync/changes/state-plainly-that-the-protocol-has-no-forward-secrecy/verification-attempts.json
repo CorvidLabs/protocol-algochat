@@ -30,6 +30,21 @@
         }
       ],
       "requirement_ids": []
+    },
+    {
+      "timestamp": 1788027298,
+      "commit": "5b42af655551c1f77791e1824757311ddf9eea9e",
+      "contract_digest": "a8c911add6a034c545d563e8fc30b815ba1cbe58868dd343552f3a91d4e7fd6a",
+      "workspace_digest": "2eb3341e4965910b2160812d89eceac4a28ce53b46b1ee5234d50bfa0219c933",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
     }
   ]
 }
