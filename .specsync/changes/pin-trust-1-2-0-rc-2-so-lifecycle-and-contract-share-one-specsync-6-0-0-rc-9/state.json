@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "workflow_origin_version": 1,
+  "id": "pin-trust-1-2-0-rc-2-so-lifecycle-and-contract-share-one-specsync-6-0-0-rc-9",
+  "slug": "pin-trust-1-2-0-rc-2-so-lifecycle-and-contract-share-one-specsync-6-0-0-rc-9",
+  "title": "Pin Trust 1.2.0-rc.2 so lifecycle and contract share one SpecSync 6.0.0-rc.9",
+  "description": "Pin Trust 1.2.0-rc.2 so lifecycle and contract share one SpecSync 6.0.0-rc.9",
+  "kind": "operations",
+  "state": "verifying",
+  "canonical_applied": true,
+  "base_commit": "7c1b04673b8734b2d4ab62fed60d3ec7f580ebfc",
+  "created_at": 1787876097,
+  "updated_at": 1787876156,
+  "affected_specs": [],
+  "affected_paths": [
+    ".github/workflows/trust.yml"
+  ],
+  "no_spec_change": true,
+  "no_spec_change_rationale": "CI pin only. Trust 1.2.0-rc.2 uses one SpecSync 6.0.0-rc.9 for lifecycle and contract; no canonical spec text changes.",
+  "acceptance_criteria": [
+    "Trust workflow pins CorvidLabs/trust@fcebc62303f89ad6573113313d75d0d26d7d2477 (v1.2.0-rc.2). fledge lanes run verify still passes."
+  ],
+  "selected_artifacts": [
+    "context",
+    "plan",
+    "testing"
+  ],
+  "dependencies": [],
+  "answers": {
+    "architecture_risk": "no",
+    "public_contract": "no"
+  }
+}
