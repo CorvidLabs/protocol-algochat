@@ -10,7 +10,7 @@ AlgoChat is an end-to-end encrypted messaging protocol that uses the Algorand bl
 ## 2. Design Goals
 
 1. **Privacy** - Only sender and recipient can read messages
-2. **Forward Secrecy** - Compromised keys don't expose past messages
+2. **Per-Message Key Separation** - Each message derives its own symmetric key from a fresh ephemeral key pair. This is *not* forward secrecy; see [11.1](#111-forward-secrecy--not-provided)
 3. **Bidirectional Decryption** - Sender can decrypt their own sent messages. This enables chat history display on the sender's device without storing plaintext locally—messages can be re-decrypted from the blockchain on any authorized device.
 4. **Immutability** - Messages cannot be altered after transmission
 5. **Decentralization** - No trusted third parties required
@@ -266,6 +266,13 @@ The `position_psk` is the PSK used for the message at this counter value.
 - Any counter value can be derived independently (no sequential dependency)
 - The `initial_psk` is never used directly for encryption
 - Compromising a `session_psk` exposes at most 100 messages in that session
+
+> **Naming note.** "Ratchet" here denotes a deterministic key *schedule*, not a
+> ratchet in the Signal/Double-Ratchet sense. Because any counter value can be
+> derived independently from `initial_psk`, holding the initial PSK yields every
+> past and future position key. Nothing is advanced-and-destroyed, so this
+> construction does not provide forward secrecy. The wire field name
+> `ratchet_counter` is retained for compatibility.
 - Compromising a `position_psk` exposes only one message
 
 ### 8.2 PSK Key Derivation
@@ -531,9 +538,35 @@ See [IMPLEMENTATION.md](./IMPLEMENTATION.md) for pseudocode examples.
 
 ## 11. Security Considerations
 
-### 11.1 Forward Secrecy
+### 11.1 Forward Secrecy — Not Provided
 
-Each message uses a fresh ephemeral key pair. Compromise of long-term keys does not reveal past messages.
+**AlgoChat does not provide forward secrecy.** Every message uses a fresh ephemeral
+key pair, which separates per-message symmetric keys, but that ephemeral key belongs
+to the *sender* and its public half travels in the envelope. Recovering a message key
+requires only a long-term private key and that public value:
+
+```
+shared_secret = X25519(recipient_private_key, envelope.ephemeral_public_key)
+```
+
+The envelope is stored permanently and publicly on the Algorand blockchain. An
+attacker who obtains either party's long-term private key — or the recovery phrase
+that derives it — can therefore retroactively decrypt **every message that account
+has ever sent or received**, and no revocation or key rotation can undo this,
+because the ciphertext remains publicly retrievable forever.
+
+This applies to both modes. In PSK mode (`0x02`) the pre-shared key is mixed into
+HKDF alongside the ECDH secret, so an attacker needs the PSK *as well as* a
+long-term key — a meaningful additional barrier, but not forward secrecy: the PSK
+is static, and every position key is a deterministic function of it (see
+[8.1](#81-psk-ratchet-mechanism)).
+
+No key material is ever ratcheted forward and destroyed. Achieving forward secrecy
+would require a scheme such as the Double Ratchet, in which past keys become
+unrecoverable after use.
+
+**Implication for users:** a recovery phrase is equivalent to the complete, permanent
+message history of that account. It must be protected accordingly.
 
 ### 11.2 Replay Protection
 
@@ -551,10 +584,20 @@ The following metadata is visible on-chain:
 ### 11.4 Key Compromise
 
 If a recipient's private key is compromised:
-- Past messages remain secure (forward secrecy)
+- **All past messages to that key are compromised.** Envelopes stay publicly
+  retrievable from the chain indefinitely, so the exposure is retroactive and
+  permanent (see [11.1](#111-forward-secrecy--not-provided))
 - Future messages to that key are compromised
-- Sender's copies remain secure (different key derivation)
-- **With PSK mode**: Future messages also require PSK compromise, providing an additional layer of protection
+- The sender's own decryptable copies use a separate derivation, so they are *not*
+  exposed by the recipient's key — but they are exposed in exactly the same
+  retroactive way by compromise of the **sender's** key
+- **With PSK mode**: decryption additionally requires the initial PSK. This raises
+  the bar against an attacker holding only one secret, but does not restore forward
+  secrecy — an attacker holding both the PSK and a long-term key recovers the full
+  history
+
+Because compromise is retroactive and irreversible, key rotation limits future
+exposure only. There is no mechanism to protect already-published ciphertext.
 
 ## 12. Constants
 
