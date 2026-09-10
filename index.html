@@ -444,7 +444,7 @@
             <p>Messages are transmitted as the <code>note</code> field of Algorand payment transactions:</p>
             <ul class="nes-list is-disc" style="margin-top: 15px;">
                 <li>Minimum payment: 0 ALGO</li>
-                <li>Sender pays tx fee (~0.001 ALGO)</li>
+                <li>Sender pays tx fee (~0.001 ALGO Ed25519, ~0.003 ALGO Falcon-1024)</li>
                 <li>Note field limit: 1024 bytes</li>
             </ul>
         </section>
@@ -463,6 +463,10 @@
                     <tr>
                         <td><span class="nes-text is-warning">1.1</span></td>
                         <td>Add ratcheting PSK mode (0x02). Hybrid X25519 + pre-shared key derivation for quantum defense-in-depth.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="nes-text is-success">1.2</span></td>
+                        <td>Account agility: payments MAY use Falcon-1024 pqsig. Encryption seed is mnemonic entropy. Envelope bytes unchanged.</td>
                     </tr>
                 </tbody>
             </table>

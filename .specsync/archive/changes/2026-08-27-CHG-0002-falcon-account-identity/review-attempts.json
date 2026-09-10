@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "reviews": [
+    {
+      "schema_version": 2,
+      "change_id": "CHG-0002-falcon-account-identity",
+      "reviewer": "grok",
+      "provenance": {
+        "schema_version": 1,
+        "provider": "github_actions_check",
+        "required_check": "SpecSync scoped review"
+      },
+      "verdict": "pass",
+      "implementation_commit": "1405b056d3f11f0cfc2cd78e1b6730da83d196c2",
+      "contract_digest": "494fa9dd6ecb9c98cdf9ffc584684653e0ac9af7d6b42372e0f813b2c8b77e40",
+      "execution_digest": "494fa9dd6ecb9c98cdf9ffc584684653e0ac9af7d6b42372e0f813b2c8b77e40",
+      "workspace_digest": "e666bc5637ed06c59a0b89cd3c7462c59221b1cd174246eed5233fff3ac915a8",
+      "timestamp": 1787873814
+    }
+  ]
+}
