@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "attempts": [
+    {
+      "timestamp": 1789154133,
+      "commit": "abf6dde34d36a14f1925d65ec91b39d96a3f6bd9",
+      "contract_digest": "99e8b26378161ee670e50d019eeed3e9ee3714787feb31f0e41ad8a2b9d93952",
+      "workspace_digest": "c4d34ddd47db5e3449a34ea538415c405ad4b7a79c721ad7becbbf0ddf0559c7",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1789154198,
+      "commit": "abf6dde34d36a14f1925d65ec91b39d96a3f6bd9",
+      "contract_digest": "99e8b26378161ee670e50d019eeed3e9ee3714787feb31f0e41ad8a2b9d93952",
+      "workspace_digest": "c4d34ddd47db5e3449a34ea538415c405ad4b7a79c721ad7becbbf0ddf0559c7",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1789154198,
+      "commit": "ec80fc4bfcdedac2d03ebddcdb9b32b24e1fa0e0",
+      "contract_digest": "99e8b26378161ee670e50d019eeed3e9ee3714787feb31f0e41ad8a2b9d93952",
+      "workspace_digest": "c4d34ddd47db5e3449a34ea538415c405ad4b7a79c721ad7becbbf0ddf0559c7",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1789154344,
+      "commit": "92b31420f8e4fbccc879b4bb333a743bf133e2a2",
+      "contract_digest": "b3851074943f528e09956e236ee2ac1ae26d5b818ffdd7a800add74abd9c5113",
+      "workspace_digest": "c4d34ddd47db5e3449a34ea538415c405ad4b7a79c721ad7becbbf0ddf0559c7",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    },
+    {
+      "timestamp": 1789154347,
+      "commit": "861bdc92bbbe66315c3a64e623c76a6d2a9fd96e",
+      "contract_digest": "b3851074943f528e09956e236ee2ac1ae26d5b818ffdd7a800add74abd9c5113",
+      "workspace_digest": "c4d34ddd47db5e3449a34ea538415c405ad4b7a79c721ad7becbbf0ddf0559c7",
+      "passed": true,
+      "commands": [
+        {
+          "command": "bun scripts/validate.ts",
+          "success": true,
+          "exit_code": 0
+        }
+      ],
+      "requirement_ids": []
+    }
+  ]
+}
