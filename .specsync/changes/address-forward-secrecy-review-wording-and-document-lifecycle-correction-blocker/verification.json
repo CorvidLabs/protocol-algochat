@@ -1,0 +1,15 @@
+{
+  "timestamp": 1789154198,
+  "commit": "abf6dde34d36a14f1925d65ec91b39d96a3f6bd9",
+  "contract_digest": "99e8b26378161ee670e50d019eeed3e9ee3714787feb31f0e41ad8a2b9d93952",
+  "workspace_digest": "c4d34ddd47db5e3449a34ea538415c405ad4b7a79c721ad7becbbf0ddf0559c7",
+  "passed": true,
+  "commands": [
+    {
+      "command": "bun scripts/validate.ts",
+      "success": true,
+      "exit_code": 0
+    }
+  ],
+  "requirement_ids": []
+}

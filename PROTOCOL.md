@@ -551,8 +551,8 @@ shared_secret = X25519(recipient_private_key, envelope.ephemeral_public_key)
 
 The envelope is stored permanently and publicly on the Algorand blockchain. An
 attacker who obtains either party's long-term private key — or the recovery phrase
-that derives it — can therefore retroactively decrypt **every message that account
-has ever sent or received**, and no revocation or key rotation can undo this,
+that derives it — can therefore retroactively decrypt **every base-mode message that account
+has ever sent or received** (PSK-mode decryption additionally requires the PSK), and no revocation or key rotation can undo this,
 because the ciphertext remains publicly retrievable forever.
 
 This applies to both modes. In PSK mode (`0x02`) the pre-shared key is mixed into
@@ -565,8 +565,8 @@ No key material is ever ratcheted forward and destroyed. Achieving forward secre
 would require a scheme such as the Double Ratchet, in which past keys become
 unrecoverable after use.
 
-**Implication for users:** a recovery phrase is equivalent to the complete, permanent
-message history of that account. It must be protected accordingly.
+**Implication for users:** a recovery phrase exposes the complete, permanent base-mode
+message history of that account; PSK-mode history additionally requires the PSK. It must be protected accordingly.
 
 ### 11.2 Replay Protection
 

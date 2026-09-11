@@ -13,7 +13,7 @@
 1. **Metadata Analysis** - Sender/recipient addresses, timing, and message sizes are visible
 2. **Endpoint Compromise** - Malware on user devices can access decrypted messages
 3. **Key Compromise** - Past and future messages to a compromised key are readable; exposure is retroactive and permanent (PSK mode additionally requires the PSK)
-4. **Past Message Exposure** - No forward secrecy: compromise of a long-term private key (or the recovery phrase that derives it) retroactively decrypts that account's entire history (see [Forward Secrecy -- Not Provided](#forward-secrecy--not-provided))
+4. **Past Message Exposure** - No forward secrecy: compromise of a long-term private key (or the recovery phrase that derives it) retroactively exposes that account's base-mode history; PSK-mode decryption additionally requires the PSK (see [Forward Secrecy -- Not Provided](#forward-secrecy-not-provided))
 5. **Traffic Analysis** - Transaction patterns may reveal communication patterns
 6. **Algorand Network Attacks** - Protocol relies on blockchain security
 7. **Quantum Attacks on Key Exchange** - X25519 is vulnerable to quantum computers. **With PSK mode (`0x02`)**, an attacker must also compromise the pre-shared key, providing defense-in-depth. See [PSK Security Properties](#psk-security-properties) below. A Falcon-1024 **account** does not close this gap: it protects who can authorize the payment, not the X25519 handshake inside the note.
@@ -33,18 +33,18 @@
 - 128-bit authentication tag detects tampering
 - Blockchain immutability prevents post-hoc modification
 
-### Forward Secrecy -- Not Provided
+### Forward Secrecy Not Provided
 
 AlgoChat does not provide forward secrecy. Each message uses a fresh ephemeral key pair, which separates per-message symmetric keys, but:
 
 - The ephemeral key pair belongs to the sender, and its public half is published permanently on-chain in the envelope
 - Recovering a message key requires only a long-term private key and that public value
-- Compromise of either party's long-term key -- or the recovery phrase that derives it -- retroactively decrypts every message that account has ever sent or received
+- Compromise of either party's long-term key -- or the recovery phrase that derives it -- retroactively decrypts that account's base-mode messages; PSK-mode decryption additionally requires the PSK
 - No revocation or key rotation can undo this; the ciphertext remains publicly retrievable forever
 
 Ephemeral private keys are never stored, which limits endpoint exposure, but this is not forward secrecy. In PSK mode (`0x02`) an attacker needs the PSK as well -- a meaningful additional barrier, but the PSK is static and every position key is a deterministic function of it.
 
-**Implication for users:** a recovery phrase is equivalent to the complete, permanent message history of that account. It must be protected accordingly.
+**Implication for users:** a recovery phrase exposes the complete, permanent base-mode message history of that account; PSK-mode history additionally requires the PSK. It must be protected accordingly.
 
 See [PROTOCOL.md §11.1](PROTOCOL.md#111-forward-secrecy--not-provided) for the full analysis.
 
