@@ -7,6 +7,14 @@
       "digest": "a8c911add6a034c545d563e8fc30b815ba1cbe58868dd343552f3a91d4e7fd6a",
       "note": "Docs-only correction of false forward-secrecy claim across PROTOCOL.md, SECURITY.md, README.md, index.html",
       "approved_delta_digests": {}
+    },
+    {
+      "gate": "definition",
+      "actor": "0xGaspar",
+      "timestamp": 1789154235,
+      "digest": "e6a33a0898c1f6b830dc49c74b642f55386496a5f1bc405d7ffb96c5f4d605c6",
+      "note": "User explicitly instructed implementing the review requests on 2026-09-11: remove the nonexistent protocol spec reference and cover all four changed documents. Original approval history and lifecycle state retained.",
+      "approved_delta_digests": {}
     }
   ],
   "reopenings": []

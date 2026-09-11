@@ -7,6 +7,14 @@
       "digest": "99e8b26378161ee670e50d019eeed3e9ee3714787feb31f0e41ad8a2b9d93952",
       "note": "User explicitly instructed implementation of PR review requests on 2026-09-11, including these documentation corrections.",
       "approved_delta_digests": {}
+    },
+    {
+      "gate": "definition",
+      "actor": "0xGaspar",
+      "timestamp": 1789154257,
+      "digest": "b3851074943f528e09956e236ee2ac1ae26d5b818ffdd7a800add74abd9c5113",
+      "note": "Same user-authorized review fixes; record that supported metadata amendment and definition approval resolved the initial CLI limitation.",
+      "approved_delta_digests": {}
     }
   ],
   "reopenings": []

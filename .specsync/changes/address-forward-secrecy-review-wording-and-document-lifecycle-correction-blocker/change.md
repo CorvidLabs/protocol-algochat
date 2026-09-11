@@ -1,6 +1,6 @@
 ---
 id: address-forward-secrecy-review-wording-and-document-lifecycle-correction-blocker
-state: implementing
+state: verifying
 type: feature
 base_commit: abf6dde34d36a14f1925d65ec91b39d96a3f6bd9
 ---

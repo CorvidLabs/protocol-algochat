@@ -1,6 +1,6 @@
 ---
 id: state-plainly-that-the-protocol-has-no-forward-secrecy
-state: implementing
+state: verifying
 type: bug_fix
 base_commit: 1d9b77ef9372df8817ff05b2f27dd2118b186d4b
 ---
@@ -13,7 +13,7 @@ State plainly that the protocol has no forward secrecy
 
 ## Affected Canonical Specs
 
-- `protocol`
+- None
 
 ## Acceptance Criteria
 

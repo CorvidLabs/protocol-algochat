@@ -10,13 +10,13 @@
   "canonical_applied": true,
   "base_commit": "1d9b77ef9372df8817ff05b2f27dd2118b186d4b",
   "created_at": 1788026870,
-  "updated_at": 1788027301,
-  "affected_specs": [
-    "protocol"
-  ],
+  "updated_at": 1789154258,
+  "affected_specs": [],
   "affected_paths": [
     "PROTOCOL.md",
-    "SECURITY.md"
+    "SECURITY.md",
+    "README.md",
+    "index.html"
   ],
   "no_spec_change": true,
   "no_spec_change_rationale": "Documentation-only correction of a false forward-secrecy claim; no wire-format, code, or spec-module changes",
