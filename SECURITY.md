@@ -188,10 +188,7 @@ Note: True forward secrecy (where past messages are safe even after full key com
 
 **Do NOT report security vulnerabilities as public GitHub issues.**
 
-Please use one of these private channels:
-
-1. **GitHub Security Advisory** (preferred): [Report a vulnerability](https://github.com/CorvidLabs/protocol-algochat/security/advisories/new)
-2. **Email**: security@corvidlabs.io (PGP key available on request)
+**GitHub Security Advisory** (preferred): [Report a vulnerability](https://github.com/CorvidLabs/protocol-algochat/security/advisories/new)
 
 Include:
 - Description of the vulnerability
