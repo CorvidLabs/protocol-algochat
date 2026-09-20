@@ -1,6 +1,7 @@
 [tasks]
 validate = "bun scripts/validate.ts"
+intent = "hi check"
 
 [lanes.verify]
-description = "Validate protocol documents and implementation registry"
-steps = ["validate"]
+description = "Validate protocol documents, implementation registry, and hi structure"
+steps = ["validate", "intent"]
