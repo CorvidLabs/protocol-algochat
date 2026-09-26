@@ -82,6 +82,22 @@ Users with less than 30K ALGO can participate through liquid staking or pools. T
 
 See [SECURITY.md](SECURITY.md) for the full threat model.
 
+## Architecture
+
+A message is an encrypted envelope in the `note` of an ordinary Algorand payment. There is no server, mailbox, or contract in between.
+
+```mermaid
+flowchart LR
+    S["Sender client"] -- "1. find recipient's X25519 key" --> I["Algorand indexer"]
+    S -- "2. X25519 + HKDF + ChaCha20-Poly1305" --> E["Envelope<br/>up to 1024 bytes"]
+    E -- "3. note of a payment signed<br/>with Ed25519 sig or Falcon pqsig" --> N["algod and ledger"]
+    N --> I
+    I -- "4. note prefix 0x0101 or 0x0102" --> R["Recipient client<br/>decrypts"]
+    I -. "sender re-decrypts its own copy" .-> S
+```
+
+The [high-level design](docs/HLD.md) walks through the keys, the wire format, encryption and decryption, key discovery, PSK mode, and the on-chain transport, with sequence diagrams for each flow.
+
 ## Documentation
 
 | Document | Description |
@@ -90,6 +106,7 @@ See [SECURITY.md](SECURITY.md) for the full threat model.
 | [IMPLEMENTATION.md](IMPLEMENTATION.md) | Language-agnostic implementation guide |
 | [TEST-VECTORS.md](TEST-VECTORS.md) | Canonical test vectors for verification |
 | [SECURITY.md](SECURITY.md) | Security considerations and threat model |
+| [docs/HLD.md](docs/HLD.md) | High-level design with diagrams |
 
 ## Implementations
 
