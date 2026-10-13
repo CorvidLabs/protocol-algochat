@@ -3,6 +3,10 @@
 **Status: shelved.** Designed, not scheduled. Nothing here is part of the
 protocol until a future version adopts it. See [When to revisit](#when-to-revisit).
 
+The [October 2026 research spike](pq-audit-spike.md) compares ML-KEM-1024 and
+ML-KEM-768 with explicit framing budgets, an offline primitive harness and an
+independent-review plan. It does not implement or activate this proposal.
+
 ## Problem
 
 Standard mode (`0x01`) derives every message key from X25519 alone
@@ -100,8 +104,11 @@ size, fees and the PSK key schedule stay exactly as they are.
    types need a protocol version bump and a transition in which old clients keep
    receiving what they read today.
 
-**Cost:** two notes per account, once, and two notes per pair, once (four if both
-start at once). At the minimum network fee of 0.001 ALGO per note, or 0.003 for a
+**Estimated cost, assuming the complete framed key and ciphertext each fit in
+two notes:** two notes per account, once, and two notes per pair, once (four if both
+start at once). The framing and sender-wrap budget must be measured before
+this estimate is a wire-format promise; the research spike shows a framing size
+at which ML-KEM-1024 needs a third note. At the minimum network fee of 0.001 ALGO per note, or 0.003 for a
 Falcon payer ([10.3](../../PROTOCOL.md#103-fees)), two notes cost 0.002 ALGO, or
 0.006 for a Falcon payer, plus any payment `amount` the implementation attaches.
 
@@ -124,8 +131,9 @@ Falcon payer ([10.3](../../PROTOCOL.md#103-fees)), two notes cost 0.002 ALGO, or
 
 ## Open questions
 
-- ML-KEM-1024 (NIST category 5) or ML-KEM-768 (category 3): both need two notes
-  for the key and for the ciphertext.
+- ML-KEM-1024 (NIST category 5) or ML-KEM-768 (category 3): both can use two notes
+  for the key and ciphertext with sufficiently small framing. The complete
+  budget, including the sender wrap, determines whether 1024 needs a third note.
 - The combiner: the HKDF construction above, or a standard hybrid KEM (X-Wing).
 - Recovering the sender's `ss`: the self-wrap above, or deriving the
   encapsulation randomness `m` from the mnemonic entropy and the parts of the
