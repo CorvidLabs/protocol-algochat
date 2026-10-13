@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "workflow_version": 2,
+  "workflow_origin_version": 2,
+  "id": "record-the-offline-pq-research-probe-and-its-local-task",
+  "slug": "record-the-offline-pq-research-probe-and-its-local-task",
+  "title": "Record the offline PQ research probe and its local task",
+  "description": "Record the offline PQ research probe and its local task",
+  "kind": "documentation",
+  "state": "draft",
+  "base_commit": "e80ab3eae8237f4f9358df775cc363de4265ed93",
+  "created_at": 1791925956,
+  "updated_at": 1791926111,
+  "affected_specs": [],
+  "affected_paths": [
+    "scripts/pq-spike.mjs",
+    "fledge.toml",
+    "docs/proposals/pq-audit-spike.md",
+    "docs/proposals/post-quantum-pair-secret.md"
+  ],
+  "no_spec_change": true,
+  "no_spec_change_rationale": "This bounded packet describes an existing offline research harness and its local pq-spike task, with unshipped proposal documentation. It changes no shipped AlgoChat cryptography, identity, protocol version, wire format, authentication, recovery behavior or canonical runtime contract. Parameter and framing comparisons are research assumptions, not an accepted protocol format or security audit.",
+  "acceptance_criteria": [
+    "The packet declares exactly the existing offline scripts/pq-spike.mjs harness, its fledge.toml pq-spike task, and the two direct research proposal documents; no shipped cryptography, protocol or runtime behavior changes.",
+    "Preserved installed-runtime evidence for the exact frozen harness records 16 ML-KEM round trips and ten negative cases for each of three parameter sets, and output contains metadata and explicit limits without generated private/shared-key bytes.",
+    "Research documents retain unshipped status and explicit framing assumptions, with no claim of independent implementation/KAT/FIPS qualification, application audit, quantum attack execution or accepted new protocol format.",
+    "SpecSync 6.1.0 records all deterministic draft answers and selected artifacts while approvals/reopenings/acceptance remain empty and every older record, global sequence and canonical obligation stays byte-identical."
+  ],
+  "selected_artifacts": [
+    "context",
+    "docs",
+    "testing",
+    "tasks"
+  ],
+  "dependencies": [],
+  "answers": {
+    "architecture_risk": "no",
+    "constraints": "Offline local research only: keep scripts/pq-spike.mjs and its exact pq-spike = \"node scripts/pq-spike.mjs\" task unchanged. Keep all existing fixed vectors, shipped PROTOCOL.md/SECURITY.md/IMPLEMENTATION.md requirements and legacy change records unchanged. Use cached installed tools; no dependency/tool downloads, wallet, signing, account, network/chain job, real payment or cloud quantum job. The 48-byte wrap and per-note framing amounts are explicit proposal assumptions. Shared OpenSSL-backed Node APIs are not independent implementations; randomized probes do not establish NIST KAT/FIPS validation, a timing or protocol audit, implemented PQ, accepted wire format, forward secrecy or quantum resistance. Draft approvals/reopenings/acceptance remain empty. Existing Trust selector already requests SpecSync 6.1.0 and needs no workflow edit.",
+    "public_contract": "no"
+  }
+}
