@@ -1,6 +1,6 @@
 # AlgoChat Test Vectors
 
-**Version**: 1.2
+**Version**: 1.2.1
 **Purpose**: Cross-implementation verification
 
 These test vectors enable implementations to verify correctness by using deterministic inputs and checking outputs match exactly.
@@ -9,6 +9,11 @@ Protocol 1.2 does not add envelope vectors. Falcon-1024 is an Algorand
 authorizing signature, not an envelope mode. The 32-byte `seed` values below
 are **mnemonic entropy** (identical to Ed25519 `sk[0:32]`). They are not a
 prefix of a Falcon secret key.
+
+Protocol 1.2.1 does not add envelope vectors either. It is a capacity and
+fee change on the same envelopes as 1.2. The note limit is 4096 bytes.
+Standard plaintext maximum is 3954 bytes. PSK plaintext maximum is 3950
+bytes. The ciphertext bytes in this file are unchanged.
 
 ## 1. Key Derivation
 
@@ -367,18 +372,22 @@ To verify interoperability between implementations:
 
 ## 8. Size Boundary Tests
 
-### Test Case 8.1: Maximum Size Message (Standard)
+### Test Case 8.1: 1024-byte Note (Standard)
+
+This vector remains valid. It is no longer the maximum. An 882-byte plaintext still encrypts, and that note is 1024 bytes.
 
 ```
-Plaintext size: 882 bytes (MAX_PAYLOAD_SIZE)
-Envelope size: 126 + 882 + 16 = 1024 bytes (exactly MAX_NOTE_SIZE)
+Plaintext size: 882 bytes
+Envelope size: 126 + 882 + 16 = 1024 bytes
 ```
 
-### Test Case 8.2: Maximum Size Message (PSK)
+### Test Case 8.2: 1024-byte Note (PSK)
+
+This vector remains valid. It is no longer the maximum. An 878-byte plaintext still encrypts, and that note is 1024 bytes.
 
 ```
-Plaintext size: 878 bytes (PSK_MAX_PAYLOAD_SIZE)
-Envelope size: 130 + 878 + 16 = 1024 bytes (exactly MAX_NOTE_SIZE)
+Plaintext size: 878 bytes
+Envelope size: 130 + 878 + 16 = 1024 bytes
 ```
 
 ### Test Case 8.3: Empty Message
@@ -395,15 +404,35 @@ PSK:
   Envelope size: 130 + 16 = 146 bytes (minimum valid size)
 ```
 
-### Test Case 8.4: Oversized Message (Must Fail)
+### Test Case 8.4: Maximum Size Message (Standard)
+
+No ciphertext bytes are given for this size. The lengths are the protocol maximum. The plaintext encrypts to a note of exactly 4096 bytes.
+
+```
+Plaintext size: 3954 bytes (MAX_PAYLOAD_SIZE)
+Envelope size: 126 + 3954 + 16 = 4096 bytes (exactly MAX_NOTE_SIZE)
+```
+
+### Test Case 8.5: Maximum Size Message (PSK)
+
+No ciphertext bytes are given for this size. The lengths are the protocol maximum. The plaintext encrypts to a note of exactly 4096 bytes.
+
+```
+Plaintext size: 3950 bytes (PSK_MAX_PAYLOAD_SIZE)
+Envelope size: 130 + 3950 + 16 = 4096 bytes (exactly MAX_NOTE_SIZE)
+```
+
+### Test Case 8.6: Oversized Message (Must Fail)
+
+883 bytes (standard) and 879 bytes (PSK) used to be oversized. Under 1.2.1 they are legal. One byte past the new maximum MUST fail before a transaction is built. A 4097-byte note is not a legal note.
 
 ```
 Standard:
-  Plaintext size: 883 bytes
+  Plaintext size: 3955 bytes
   Expected: Encryption error "message too large"
 
 PSK:
-  Plaintext size: 879 bytes
+  Plaintext size: 3951 bytes
   Expected: Encryption error "message too large"
 ```
 

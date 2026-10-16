@@ -2,7 +2,7 @@
 
 This document explains how AlgoChat works end to end: the keys, the envelope on the wire, how a message is encrypted and read, how peers find each other's keys, and how the envelope rides on an Algorand payment. It also covers the machinery in this repository (validation, the status dashboard, the trust gate, GitHub Pages).
 
-It describes protocol **1.2**. The normative text is [PROTOCOL.md](../PROTOCOL.md). If this document and PROTOCOL.md ever disagree, PROTOCOL.md wins. Pseudocode lives in [IMPLEMENTATION.md](../IMPLEMENTATION.md), byte-exact examples in [TEST-VECTORS.md](../TEST-VECTORS.md), and the threat model in [SECURITY.md](../SECURITY.md).
+It describes protocol **1.2.1**. The normative text is [PROTOCOL.md](../PROTOCOL.md). If this document and PROTOCOL.md ever disagree, PROTOCOL.md wins. Pseudocode lives in [IMPLEMENTATION.md](../IMPLEMENTATION.md), byte-exact examples in [TEST-VECTORS.md](../TEST-VECTORS.md), and the threat model in [SECURITY.md](../SECURITY.md).
 
 Notation: `‖` means byte concatenation (PROTOCOL.md writes it `||`). `HKDF(ikm, salt, info)` is HKDF-SHA256 with a 32-byte output. `seal` and `open` are ChaCha20-Poly1305 encrypt and decrypt.
 
@@ -91,7 +91,7 @@ The implementation and client lists come from [README.md](../README.md) and [imp
 
 ### 3.1 Protocol layers
 
-The protocol is four thin, loosely coupled layers: protocol 1.2 added Falcon-1024 at the account layer without changing a single envelope byte ([PROTOCOL.md §14](../PROTOCOL.md#14-version-history)).
+The protocol is four thin, loosely coupled layers: protocol 1.2 added Falcon-1024 at the account layer without changing a single envelope byte. Protocol 1.2.1 keeps those envelopes and raises the note ceiling to 4096 bytes ([PROTOCOL.md §14](../PROTOCOL.md#14-version-history)).
 
 ```mermaid
 flowchart TB
@@ -110,7 +110,7 @@ flowchart TB
         E2["0x02 PSK<br/>130-byte header"]
     end
     subgraph L4["Transport and discovery: public chain"]
-        TX["Payment transaction<br/>note up to 1024 bytes"]
+        TX["Payment transaction<br/>note up to 4096 bytes"]
         DISC["Indexer search<br/>note prefix 0x0101 or 0x0102"]
     end
     MN --> XK
@@ -161,7 +161,7 @@ Rules that matter (all from [PROTOCOL.md §4](../PROTOCOL.md#4-key-derivation)):
 
 | Path | Owns |
 | --- | --- |
-| [PROTOCOL.md](../PROTOCOL.md) | The normative protocol, version 1.2 |
+| [PROTOCOL.md](../PROTOCOL.md) | The normative protocol, version 1.2.1 |
 | [IMPLEMENTATION.md](../IMPLEMENTATION.md) | Language-neutral pseudocode, data structures, error names, PSK UX guidance |
 | [TEST-VECTORS.md](../TEST-VECTORS.md) | Byte-exact vectors for key derivation, envelopes, round trips, PSK schedule, size limits |
 | [SECURITY.md](../SECURITY.md) | Threat model, PSK threat matrix, key handling guidance, vulnerability reporting |
@@ -220,14 +220,14 @@ sequenceDiagram
     participant N as algod node
     participant L as Algorand ledger
     U->>C: text for a recipient address
-    Note over C: payload = JSON with "text", at most 882 bytes<br/>recipient X25519 key from flow 4.1
+    Note over C: payload = JSON with "text", at most 3954 bytes<br/>recipient X25519 key from flow 4.1
     C->>K: encrypt payload for recipient_pub
     Note over K: eph = fresh X25519 key pair from RANDOM(32)<br/>shared = X25519(eph_priv, recipient_pub)<br/>key = HKDF(shared, eph_pub, "AlgoChatV1" ‖ sender_pub ‖ recipient_pub)<br/>nonce = RANDOM(12)<br/>ciphertext = seal(key, nonce, payload)
     Note over K: sender_shared = X25519(eph_priv, sender_pub)<br/>sender_key = HKDF(sender_shared, eph_pub, "AlgoChatV1-SenderKey" ‖ sender_pub)<br/>encrypted_sender_key = seal(sender_key, nonce, key)<br/>eph_priv is discarded, never stored
     K-->>C: envelope = 01 01 ‖ sender_pub ‖ eph_pub ‖ nonce ‖ encrypted_sender_key ‖ ciphertext
     C->>N: get suggested params
     N-->>C: suggested params
-    Note over C: payment sender to recipient, amount 0, note = envelope<br/>sign with sig (Ed25519) or pqsig (Falcon-1024, fee at least 3 x min-fee)
+    Note over C: payment sender to recipient, amount 0, note = envelope<br/>sign with sig (Ed25519) or pqsig (Falcon-1024)<br/>fee = scheme minimum + note surcharge (section 10.3)
     C->>N: submit signed transaction
     N->>L: included in a block, public and permanent
     L-->>C: transaction id confirmed
@@ -376,8 +376,8 @@ Offsets are from the deserializer in [IMPLEMENTATION.md](../IMPLEMENTATION.md) (
 | --- | --- | --- |
 | Header | 126 bytes | 130 bytes |
 | Smallest valid envelope (empty payload, tag only) | 142 bytes | 146 bytes |
-| Largest envelope (Algorand note limit) | 1024 bytes | 1024 bytes |
-| Largest plaintext payload | 882 bytes | 878 bytes |
+| Largest envelope (Algorand note limit) | 4096 bytes | 4096 bytes |
+| Largest plaintext payload | 3954 bytes | 3950 bytes |
 | Note prefix for indexer filtering | `0x0101` | `0x0102` |
 
 ### 5.2 Payload
@@ -390,7 +390,7 @@ The plaintext inside `ciphertext` is UTF-8 JSON ([PROTOCOL.md §9](../PROTOCOL.m
 | Reply | `text`, `replyTo.txid`, `replyTo.preview` | Show it, linked to the earlier transaction |
 | Key publish | `type: "key-publish"`, `publicKey` (base64) | Not a user message; filter it out |
 
-The 882 and 878-byte limits apply to the encrypted plaintext, which is this JSON, so the usable text is somewhat shorter.
+The 3954 and 3950-byte limits apply to the encrypted plaintext, which is this JSON, so the usable text is somewhat shorter. A plaintext of 882 bytes (standard) or 878 bytes (PSK) still fills a 1024-byte note. Those sizes remain valid and are no longer the maximum.
 
 ### 5.3 PSK key schedule
 
@@ -482,7 +482,7 @@ What must be kept, and where ([SECURITY.md](../SECURITY.md#key-management)):
 
 This repository ships documents, not binaries. The "release" is a protocol version.
 
-- **Versioning.** The version is stated at the top of [PROTOCOL.md](../PROTOCOL.md) and [TEST-VECTORS.md](../TEST-VECTORS.md) and tagged in git: `1.0.0`, `1.1.0` (added `0x02`), `1.2.0` (Falcon-1024 accounts, no envelope change). So far a new envelope format has meant a new protocol byte (`0x02` in 1.1), and existing envelope bytes and test vectors have stayed unchanged.
+- **Versioning.** The version is stated at the top of [PROTOCOL.md](../PROTOCOL.md) and [TEST-VECTORS.md](../TEST-VECTORS.md). Prior releases were tagged `1.0.0`, `1.1.0` (added `0x02`), and `1.2.0` (Falcon-1024 accounts, no envelope change). `1.2.1` raises the note ceiling to 4096 bytes and adds a fee surcharge for note bytes past 1024. It is the same envelopes as 1.2, not a new protocol byte. A new envelope format has meant a new protocol byte (`0x02` in 1.1). Existing envelope bytes and test vectors stay valid.
 - **Local checks.** `fledge lanes run verify` runs the `validate` task (`bun scripts/validate.ts`). `fledge run intent` runs `hi check`. `fledge trust verify` runs the whole trust gate.
 - **Trust gate in CI.** [trust.yml](https://github.com/CorvidLabs/protocol-algochat/blob/main/.github/workflows/trust.yml) runs on every pull request and every push to `main`, and `trust` is the required status check on `main`.
 - **Status dashboard.** [status.yml](https://github.com/CorvidLabs/protocol-algochat/blob/main/.github/workflows/status.yml) runs as in [§4.6](#46-publish-the-status-dashboard).
@@ -556,11 +556,12 @@ Things worth understanding before building on it:
 
 | What goes wrong | Where it shows up | What happens |
 | --- | --- | --- |
-| Payload over 882 bytes (878 in PSK mode) | Encrypt | `MESSAGE_TOO_LARGE`; the protocol has no fragmentation, so the application must split |
+| Payload over 3954 bytes (3950 in PSK mode) | Encrypt | `MESSAGE_TOO_LARGE` before a transaction is built; the protocol has no fragmentation, so the application must split |
+| Note of 4097 bytes | Transport | Not a legal note; consensus rejects it |
 | Envelope too short, wrong version, unknown protocol byte | Parse | `INVALID_ENVELOPE`, `UNKNOWN_VERSION`, `UNKNOWN_PROTOCOL`; the note is skipped |
 | Tampered bytes, wrong key, wrong PSK or counter | Decrypt | `DECRYPTION_FAILED`; no plaintext is returned |
 | Peer has never sent an AlgoChat payment and published no key | Discovery | `KEY_NOT_FOUND`; fall back to out of band |
-| Falcon payment pays less than 3 x min-fee, or any submit error | Transport | Rejected by consensus; `TRANSACTION_FAILED` |
+| Fee below the scheme minimum plus the note surcharge (Falcon scheme minimum is 3 x min-fee), or any submit error | Transport | Rejected by consensus; `TRANSACTION_FAILED` |
 | No PSK stored for this contact | PSK send or receive | `PSK_NOT_FOUND`; prompt the user to set one up |
 | Counter older or further ahead than the window | PSK receive | `PSK_COUNTER_OUT_OF_RANGE`; warn about desync, offer a counter reset |
 | Counter already decrypted | PSK receive | `PSK_COUNTER_REPLAY`; discard silently, log for debugging |
@@ -569,7 +570,7 @@ Things worth understanding before building on it:
 Error names are from [IMPLEMENTATION.md](../IMPLEMENTATION.md) (Error Handling, UI/UX Guidance). Other limits, from [README.md](../README.md) and [SECURITY.md](../SECURITY.md#known-limitations):
 
 - **Latency** is Algorand block finality, stated in the README as about 4.5 seconds.
-- **Cost** is the network minimum fee per message: about 0.001 ALGO for Ed25519 and 0.003 ALGO for Falcon-1024 at a 1,000 µAlgo min-fee. AlgoChat sets no fee of its own.
+- **Cost** is the Algorand scheme minimum plus a surcharge for note bytes past 1024. At a 1,000 µAlgo min-fee, a note of 1024 bytes or fewer is 1,000 µAlgo (Ed25519) or 3,000 µAlgo (Falcon-1024). A 4096-byte note is 1,308 µAlgo (Ed25519) or 3,308 µAlgo (Falcon-1024). A 2000-byte Ed25519 note is 1,098 µAlgo. AlgoChat sets no fee of its own. See [PROTOCOL.md §10.3](../PROTOCOL.md#103-fees).
 - **No deletion.** Messages are permanent.
 - **One to one only.** Groups need one encryption per member or a protocol extension.
 - **Discovery depth.** The reference discovery searches at most 100 transactions per prefix and takes the first envelope that parses.
@@ -589,7 +590,7 @@ The big choices, and where they are recorded:
 | PSK as a new protocol byte `0x02`, purely additive | Old envelopes and vectors stay valid | [PROTOCOL.md §5.4](../PROTOCOL.md#54-protocol-identifiers), [§8](../PROTOCOL.md#8-psk-ratcheting-mode-protocol-0x02), [hi/psk.md](../hi/psk.md) |
 | Deterministic PSK key schedule with a 200-counter window | Works with out-of-order delivery; the price is no forward secrecy and a 100-message session blast radius | [PROTOCOL.md §8.1](../PROTOCOL.md#81-psk-ratchet-mechanism), [SECURITY.md](../SECURITY.md#psk-known-limitations) |
 | Falcon-1024 lives only at the account layer; import defaults to Ed25519 | Quantum-resistant payment authorization without moving existing wallets or changing envelopes | [PROTOCOL.md §4.3](../PROTOCOL.md#43-algorand-account-identity), [hi/account.md](../hi/account.md), [CHG-0002](https://github.com/CorvidLabs/protocol-algochat/blob/main/.specsync/archive/changes/2026-08-27-CHG-0002-falcon-account-identity/change.md) |
-| Envelopes stay within 1,024 bytes; hybrid PQ-KEM and PQ multisig are out of scope for 1.2 | Keep 1.2 small; a PQ-KEM envelope would be a later protocol id | [CHG-0002 design](https://github.com/CorvidLabs/protocol-algochat/blob/main/.specsync/archive/changes/2026-08-27-CHG-0002-falcon-account-identity/design.md) (Out of scope) |
+| 1.2 kept notes within 1,024 bytes. 1.2.1 raises the ceiling to 4,096 bytes without a new envelope. Hybrid PQ-KEM and PQ multisig stay out of scope | Same envelopes as 1.2; a PQ-KEM envelope would be a later protocol id | [PROTOCOL.md §14](../PROTOCOL.md#14-version-history), [CHG-0002 design](https://github.com/CorvidLabs/protocol-algochat/blob/main/.specsync/archive/changes/2026-08-27-CHG-0002-falcon-account-identity/design.md) (Out of scope) |
 | Say plainly that there is no forward secrecy | Honesty about what the chain keeps forever | [hi/honest.md](../hi/honest.md) `HONEST-2`, [PROTOCOL.md §11.1](../PROTOCOL.md#111-forward-secrecy--not-provided), [.specsync/changes/](https://github.com/CorvidLabs/protocol-algochat/tree/main/.specsync/changes) |
 
 
@@ -615,8 +616,8 @@ These are places where the documents disagree or are silent. None changes the wi
 | Indexer | Algorand's query service; AlgoChat uses it to search by note prefix |
 | Key publish | A self-addressed AlgoChat payment whose payload is `type: "key-publish"`, so others can find the sender's X25519 key |
 | Mnemonic entropy | The 32-byte secret behind a 25-word Algorand mnemonic; the IKM for AlgoChat keys |
-| min-fee | Algorand's minimum transaction fee; PROTOCOL.md §10.3 prices at 1,000 µAlgo |
-| Note | The free-form bytes field of an Algorand transaction, 1,024 bytes at most |
+| min-fee | Algorand's minimum transaction fee. PROTOCOL.md §10.3 prices examples at 1,000 µAlgo. The scheme minimum covers the first 1024 note bytes; later bytes add a surcharge |
+| Note | The free-form bytes field of an Algorand transaction, 4,096 bytes at most. 4,097 bytes is not legal |
 | `pqsig` | Algorand's native Falcon-1024 transaction signature, scheme `f1` |
 | PSK | Pre-shared key: 32 random bytes two people share out of band for mode `0x02` |
 | Ratchet counter | The 4-byte counter in a PSK envelope that picks the position key; a schedule index, not a Signal-style ratchet |

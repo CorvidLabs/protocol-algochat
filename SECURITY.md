@@ -151,7 +151,8 @@ Note: The PSK ratchet adds **breadth limitation** only. Every position key is a 
 
 ### Message Size
 
-- Maximum plaintext: 882 bytes
+- Maximum plaintext: 3954 bytes (standard), 3950 bytes (PSK)
+- Note limit: 4096 bytes. A note of 4097 bytes is not legal.
 - Longer messages require application-level fragmentation
 
 ### Deniability

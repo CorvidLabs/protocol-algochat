@@ -61,7 +61,7 @@ function encryptMessage(
 
     messageBytes = encode(plaintext)
 
-    if length(messageBytes) > 882:
+    if length(messageBytes) > 3954:
         throw Error("Message too large")
 
     // Generate ephemeral key pair
@@ -353,7 +353,7 @@ enum AlgoChatError:
     UNKNOWN_VERSION           // Unsupported protocol version
     UNKNOWN_PROTOCOL          // Unrecognized protocol byte
     DECRYPTION_FAILED         // Authentication tag mismatch
-    MESSAGE_TOO_LARGE         // Exceeds payload limit (882 standard, 878 PSK)
+    MESSAGE_TOO_LARGE         // Exceeds payload limit (3954 standard, 3950 PSK)
     KEY_NOT_FOUND             // Could not discover recipient key
     TRANSACTION_FAILED        // Blockchain submission error
     PSK_NOT_FOUND             // No PSK established for this contact
@@ -522,7 +522,7 @@ func encryptMessagePSK(
 ) throws -> PSKEnvelope {
     let messageBytes = Data(plaintext.utf8)
 
-    guard messageBytes.count <= 878 else {
+    guard messageBytes.count <= 3950 else {
         throw AlgoChatError.messageTooLarge
     }
 
