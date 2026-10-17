@@ -1,3 +1,5 @@
+> **This repository has moved.** Development continues in [CorvidLabs/algochat](https://github.com/CorvidLabs/algochat). This copy stays public so existing package versions keep resolving. Open new work in the monorepo.
+
 # AlgoChat Protocol
 
 [![License](https://img.shields.io/github/license/CorvidLabs/protocol-algochat)](https://github.com/CorvidLabs/protocol-algochat/blob/main/LICENSE)
