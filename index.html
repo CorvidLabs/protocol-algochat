@@ -281,7 +281,7 @@
                     <span class="byte payload">ciphertext:var</span>
                 </div>
                 <div class="wire-summary">
-                    <strong>Header:</strong> 126 bytes &nbsp;|&nbsp; <strong>Max plaintext:</strong> 882 bytes &nbsp;|&nbsp; <strong>Note limit:</strong> 1024 bytes
+                    <strong>Header:</strong> 126 bytes &nbsp;|&nbsp; <strong>Max plaintext:</strong> 3954 bytes &nbsp;|&nbsp; <strong>Note limit:</strong> 4096 bytes
                 </div>
             </div>
 
@@ -298,7 +298,7 @@
                     <span class="byte payload">ciphertext:var</span>
                 </div>
                 <div class="wire-summary">
-                    <strong>Header:</strong> 130 bytes &nbsp;|&nbsp; <strong>Max plaintext:</strong> 878 bytes &nbsp;|&nbsp; <strong>Hybrid:</strong> X25519 + ratcheted PSK
+                    <strong>Header:</strong> 130 bytes &nbsp;|&nbsp; <strong>Max plaintext:</strong> 3950 bytes &nbsp;|&nbsp; <strong>Note limit:</strong> 4096 bytes &nbsp;|&nbsp; <strong>Hybrid:</strong> X25519 + ratcheted PSK
                 </div>
             </div>
 
@@ -356,8 +356,8 @@
                     </tr>
                     <tr>
                         <td>Max plaintext</td>
-                        <td>882 bytes</td>
-                        <td>878 bytes</td>
+                        <td>3954 bytes</td>
+                        <td>3950 bytes</td>
                     </tr>
                     <tr>
                         <td>Session size</td>
@@ -447,8 +447,8 @@
             <p>Messages are transmitted as the <code>note</code> field of Algorand payment transactions:</p>
             <ul class="nes-list is-disc" style="margin-top: 15px;">
                 <li>Minimum payment: 0 ALGO</li>
-                <li>Sender pays tx fee (~0.001 ALGO Ed25519, ~0.003 ALGO Falcon-1024)</li>
-                <li>Note field limit: 1024 bytes</li>
+                <li>Fee is the scheme minimum for the first 1024 note bytes, then a surcharge. At a 1,000 µAlgo min-fee, 4096 bytes is 1308 µAlgo (Ed25519) or 3308 µAlgo (Falcon-1024).</li>
+                <li>Note field limit: 4096 bytes. 4097 is not a legal note.</li>
             </ul>
         </section>
 
@@ -470,6 +470,10 @@
                     <tr>
                         <td><span class="nes-text is-success">1.2</span></td>
                         <td>Account agility: payments MAY use Falcon-1024 pqsig. Encryption seed is mnemonic entropy. Envelope bytes unchanged.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="nes-text is-success">1.2.1</span></td>
+                        <td>Capacity and fee change, not a new envelope. Same envelopes as 1.2. Note limit 4096 bytes. Standard plaintext 3954, PSK plaintext 3950. Scheme minimum covers the first 1024 note bytes.</td>
                     </tr>
                 </tbody>
             </table>

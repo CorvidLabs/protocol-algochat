@@ -1,6 +1,6 @@
 # AlgoChat Protocol Specification
 
-**Version**: 1.2
+**Version**: 1.2.1
 **Status**: Stable
 
 ## 1. Overview
@@ -112,9 +112,13 @@ that address MUST carry a Falcon `pqsig` and MUST pay the Falcon fee
 ### 5.3 Size Constraints (Standard Mode)
 
 - **Header size**: 126 bytes (fixed)
-- **Algorand note limit**: 1024 bytes
-- **Maximum ciphertext**: 898 bytes (1024 - 126)
-- **Maximum plaintext**: 882 bytes (898 - 16 auth tag)
+- **Algorand note limit**: 4096 bytes
+- **Maximum ciphertext**: 3970 bytes (4096 - 126)
+- **Maximum plaintext**: 3954 bytes (3970 - 16 auth tag)
+
+A plaintext of 3954 bytes encrypts to a note of exactly 4096 bytes. One byte past that maximum MUST fail before a transaction is built. A note of 4097 bytes is not legal.
+
+A plaintext of 882 bytes still encrypts. That envelope is 1024 bytes. It remains valid and is no longer the maximum.
 
 ### 5.4 Protocol Identifiers
 
@@ -149,9 +153,13 @@ The `ratchet_counter` field is a monotonically increasing 32-bit unsigned intege
 ### 5.6 PSK Size Constraints
 
 - **PSK header size**: 130 bytes (126 + 4 bytes ratchet counter)
-- **Algorand note limit**: 1024 bytes
-- **Maximum ciphertext**: 894 bytes (1024 - 130)
-- **Maximum plaintext**: 878 bytes (894 - 16 auth tag)
+- **Algorand note limit**: 4096 bytes
+- **Maximum ciphertext**: 3966 bytes (4096 - 130)
+- **Maximum plaintext**: 3950 bytes (3966 - 16 auth tag)
+
+A plaintext of 3950 bytes encrypts to a note of exactly 4096 bytes. One byte past that maximum MUST fail before a transaction is built. A note of 4097 bytes is not legal.
+
+A plaintext of 878 bytes still encrypts. That envelope is 1024 bytes. It remains valid and is no longer the maximum.
 
 ## 6. Encryption
 
@@ -506,17 +514,36 @@ Falcon-1024 senders.
 
 ### 10.3 Fees
 
-AlgoChat does not set the network fee. It inherits Algorand's minimum.
+AlgoChat does not set the network fee. It inherits Algorand's minimum for the authorizing scheme, plus a surcharge once the note grows past 1024 bytes.
 
-| Authorizing scheme | Minimum fee at 1,000 µAlgo base | Notes |
+The scheme minimum covers the first 1024 note bytes. For a note that is allowed:
+
+```
+over           = max(0, noteBytes - 1024)
+surcharge      = ceil((over * minFee) / 10000)   # integer; 0 when over is 0
+schemeMinimum  = minFee * 3 when Falcon-1024, else minFee
+fee            = schemeMinimum + surcharge
+```
+
+The same surcharge, using integer division on these non-negative values:
+
+```
+surcharge = (over * minFee + 9999) / 10000
+```
+
+A note of 1024 bytes or fewer pays only the scheme minimum. A note of 4097 bytes is not a legal note.
+
+Confirmed examples at minFee = 1000 µAlgo:
+
+| Note bytes | Authorizing scheme | Fee |
 | --- | --- | --- |
-| Ed25519 | 1,000 µAlgo (0.001 ALGO) | Historical AlgoChat default |
-| Falcon-1024 | 3,000 µAlgo (0.003 ALGO) | Base + 2× Falcon contribution |
+| 1024 | Ed25519 | 1,000 µAlgo |
+| 1024 | Falcon-1024 | 3,000 µAlgo |
+| 2000 | Ed25519 | 1,098 µAlgo |
+| 4096 | Ed25519 | 1,308 µAlgo |
+| 4096 | Falcon-1024 | 3,308 µAlgo |
 
-Implementations MUST set a Falcon payment's fee to at least three times
-`min-fee` (or the value reported by simulate with a placeholder `pqsig`).
-Underpaying is rejected by consensus. The payment `amount` field (often 0 or
-1,000 µAlgo) is independent of this fee.
+Implementations MUST set the fee to at least `schemeMinimum + surcharge` (or the value reported by simulate with a placeholder `pqsig` when the scheme is Falcon). Underpaying is rejected by consensus. The payment `amount` field (often 0 or 1,000 µAlgo) is independent of this fee.
 
 **Filtering for AlgoChat transactions:**
 
@@ -606,18 +633,19 @@ exposure only. There is no mechanism to protect already-published ciphertext.
 PROTOCOL_VERSION       = 0x01
 PROTOCOL_STANDARD      = 0x01
 HEADER_SIZE            = 126
-MAX_PAYLOAD_SIZE       = 882
+MAX_PAYLOAD_SIZE       = 3954
 
 // PSK ratcheting mode
 PROTOCOL_PSK_RATCHET   = 0x02
 PSK_HEADER_SIZE        = 130
-PSK_MAX_PAYLOAD_SIZE   = 878
+PSK_MAX_PAYLOAD_SIZE   = 3950
 PSK_SESSION_SIZE       = 100
 COUNTER_WINDOW         = 200
 
 // Shared
-MAX_NOTE_SIZE          = 1024
+MAX_NOTE_SIZE          = 4096
 FALCON_FEE_MULTIPLIER  = 3   // Falcon-1024 min fee = minFee * 3
+// Note surcharge (integer): ceil((max(0, noteBytes - 1024) * minFee) / 10000), added to the scheme minimum.
 
 // Key derivation constants
 KEY_DERIVATION_SALT        = "AlgoChat-v1-encryption"
@@ -643,3 +671,4 @@ See [TEST-VECTORS.md](./TEST-VECTORS.md) for canonical test vectors that enable 
 | 1.0 | Initial specification |
 | 1.1 | Add ratcheting PSK mode (protocol `0x02`). |
 | 1.2 | Account agility: payments MAY be Falcon-1024 `pqsig` as well as Ed25519 `sig`. Encryption seed is mnemonic entropy, not a signing-key prefix. Falcon min fee is 3×. Envelope bytes and 1.1 test vectors are unchanged. |
+| 1.2.1 | Capacity and fee change, not a new envelope. Same envelopes as 1.2. Note limit is 4096 bytes (standard plaintext 3954, PSK plaintext 3950). The scheme minimum covers the first 1024 note bytes; further bytes add the surcharge in section 10.3. |
