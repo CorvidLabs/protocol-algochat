@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "workflow_version": 2,
+  "workflow_origin_version": 2,
+  "id": "add-offline-algochat-v1-2-envelope-boundary-research-probe",
+  "slug": "add-offline-algochat-v1-2-envelope-boundary-research-probe",
+  "title": "Add offline AlgoChat v1.2 envelope boundary research probe",
+  "description": "Add offline AlgoChat v1.2 envelope boundary research probe",
+  "kind": "refactor",
+  "state": "draft",
+  "base_commit": "9c854edfb069bddc8cfa76e160c3ba8daebcbb65",
+  "created_at": 1792128101,
+  "updated_at": 1792129998,
+  "affected_specs": [],
+  "affected_paths": [
+    "scripts/protocol-boundary-probe.mjs",
+    "scripts/protocol-boundary-probe.test.mjs",
+    "docs/audits/current-protocol-boundaries.md"
+  ],
+  "no_spec_change": true,
+  "no_spec_change_rationale": "Research-only executable tests and audit notes for existing protocol documents; no canonical module spec or production wire/API behavior is changed. All normative decisions remain unresolved.",
+  "acceptance_criteria": [
+    "Agent-proposed checks: compare published vectors with real local crypto; distinguish authentication rejection from setup or parsing failures; exercise both PSK decrypt roles and corrupted-wrap isolation; bound representable uint32 spans with failing-before evidence; preserve unresolved protocol decisions and explicit client-audit limits."
+  ],
+  "selected_artifacts": [
+    "context",
+    "plan",
+    "testing"
+  ],
+  "dependencies": [],
+  "answers": {
+    "architecture_risk": "no",
+    "public_contract": "no"
+  }
+}
