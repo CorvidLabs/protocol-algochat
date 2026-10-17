@@ -22,6 +22,8 @@ jobs:
 
       - uses: CorvidLabs/trust@dd52a7a90ffbc1d2b1030e37007c18274f3d96bc # v1.2.1
         id: trust
+        with:
+          specsync-version: "6.1.0"
 
       - name: Render Atlas publication
         if: github.event_name == 'push' && steps.trust.outputs['atlas-enabled'] == 'true'
